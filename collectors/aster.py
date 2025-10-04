@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 from collectors.base import BaseCollector
 from models import FundingRate
-from config import ASTER_FUNDING_INTERVALS, EXCHANGES
+from config import get_fees, get_funding_interval
 
 
 class AsterCollector(BaseCollector):
@@ -21,7 +21,7 @@ class AsterCollector(BaseCollector):
 
     def _get_funding_interval(self, symbol: str) -> int:
         """Get funding interval for a symbol (4h or 8h depending on symbol)"""
-        return ASTER_FUNDING_INTERVALS.get(symbol, EXCHANGES["aster"]["funding_interval_hours"])
+        return get_funding_interval("aster", symbol)
 
     async def get_funding_rates(self, symbols: List[str]) -> List[FundingRate]:
         """Get current funding rates for symbols using premiumIndex endpoint"""
@@ -46,6 +46,9 @@ class AsterCollector(BaseCollector):
                         # Try to match with our symbols
                         for symbol in symbols:
                             if aster_symbol == self._normalize_aster_symbol(symbol):
+                                # Get fees from config
+                                maker_fee, taker_fee = get_fees("aster", symbol)
+
                                 funding_rates.append(FundingRate(
                                     exchange=self.exchange_name,
                                     symbol=symbol,
@@ -55,8 +58,8 @@ class AsterCollector(BaseCollector):
                                     next_funding_time=datetime.fromtimestamp(
                                         item["nextFundingTime"] / 1000
                                     ) if item.get("nextFundingTime") else None,
-                                    maker_fee=0.0001,   # Default: 0.01%
-                                    taker_fee=0.00035   # Default: 0.035%
+                                    maker_fee=maker_fee,
+                                    taker_fee=taker_fee
                                 ))
                                 break
 

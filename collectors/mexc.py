@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List
 from collectors.base import BaseCollector
 from models import FundingRate
-from config import MEXC_API_BASE
+from config import MEXC_API_BASE, get_fees
 
 
 class MEXCCollector(BaseCollector):
@@ -55,28 +55,14 @@ class MEXCCollector(BaseCollector):
                             normalized = symbol.replace("_USDT", "")
                             all_rates[normalized] = item
 
-                # Process contract details (fees)
-                fee_info = {}
-                if not isinstance(detail_response, Exception):
-                    async with detail_response:
-                        detail_data = await detail_response.json()
-
-                        if detail_data.get("success") and detail_data.get("data"):
-                            for contract in detail_data["data"]:
-                                symbol = contract.get("symbol", "")
-                                if symbol.endswith("_USDT"):
-                                    normalized = symbol.replace("_USDT", "")
-                                    fee_info[normalized] = {
-                                        "maker_fee": float(contract.get("makerFeeRate", 0)),
-                                        "taker_fee": float(contract.get("takerFeeRate", 0))
-                                    }
-
-                # Combine funding rates with fee information
+                # Combine funding rates with fee information from config
                 funding_rates = []
                 for symbol in symbols:
                     if symbol in all_rates:
                         rate_data = all_rates[symbol]
-                        fees = fee_info.get(symbol, {})
+
+                        # Get fees from config (symbol-specific for MEXC)
+                        maker_fee, taker_fee = get_fees("mexc", symbol)
 
                         funding_rates.append(FundingRate(
                             exchange=self.exchange_name,
@@ -87,8 +73,8 @@ class MEXCCollector(BaseCollector):
                             next_funding_time=datetime.fromtimestamp(
                                 rate_data["nextSettleTime"] / 1000
                             ) if rate_data.get("nextSettleTime") else None,
-                            maker_fee=fees.get("maker_fee"),
-                            taker_fee=fees.get("taker_fee")
+                            maker_fee=maker_fee,
+                            taker_fee=taker_fee
                         ))
 
                 return funding_rates

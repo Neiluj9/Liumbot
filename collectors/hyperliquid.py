@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 from collectors.base import BaseCollector
 from models import FundingRate
-from config import HYPERLIQUID_API
+from config import HYPERLIQUID_API, get_fees, get_funding_interval
 
 
 class HyperliquidCollector(BaseCollector):
@@ -54,6 +54,9 @@ class HyperliquidCollector(BaseCollector):
                                     exchange_data = exchange_item[1]
 
                                     if exchange_name == "HlPerp" and isinstance(exchange_data, dict):
+                                        # Get fees from config
+                                        maker_fee, taker_fee = get_fees("hyperliquid", symbol)
+
                                         funding_rates.append(FundingRate(
                                             exchange=self.exchange_name,
                                             symbol=symbol,
@@ -63,8 +66,8 @@ class HyperliquidCollector(BaseCollector):
                                             next_funding_time=datetime.fromtimestamp(
                                                 exchange_data["nextFundingTime"] / 1000
                                             ) if exchange_data.get("nextFundingTime") else None,
-                                            maker_fee=0.00015,  # Default: 0.015%
-                                            taker_fee=0.00045   # Default: 0.045%
+                                            maker_fee=maker_fee,
+                                            taker_fee=taker_fee
                                         ))
                                         break
                                 break

@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 from datetime import datetime
 from collectors import HyperliquidCollector, MEXCCollector, AsterCollector
 from analyzer import FundingRateAnalyzer
@@ -50,9 +51,15 @@ async def main():
     print("=" * 60)
     print("CRYPTO FUNDING RATE ARBITRAGE ANALYZER")
     print("=" * 60)
-    print(f"Timestamp: {datetime.now().isoformat()}")
+    timestamp = datetime.now()
+    print(f"Timestamp: {timestamp.isoformat()}")
     print(f"Tracking symbols: {', '.join(SYMBOLS)}")
     print()
+
+    # Create exports directory and timestamp for files
+    timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
+    export_dir = "exports"
+    os.makedirs(export_dir, exist_ok=True)
 
     # Collect funding rates
     print("📊 Collecting funding rates...")
@@ -66,7 +73,8 @@ async def main():
     print()
 
     # Export current rates to file
-    with open("current_funding_rates.json", "w") as f:
+    rates_file = f"{export_dir}/current_funding_rates_{timestamp_str}.json"
+    with open(rates_file, "w") as f:
         rates_data = [
             {
                 "symbol": rate.symbol,
@@ -79,7 +87,7 @@ async def main():
             for rate in sorted(funding_rates, key=lambda x: (x.symbol, x.exchange))
         ]
         json.dump(rates_data, f, indent=2)
-    print("💾 Saved current rates to current_funding_rates.json")
+    print(f"💾 Saved current rates to {rates_file}")
     print()
 
     # Analyze for arbitrage
@@ -97,8 +105,8 @@ async def main():
         print("Note: Rates shown are as received for each exchange's funding interval\n")
 
         # Table header
-        print(f"{'#':<3} {'Symbol':<8} {'Long Exch':<12} {'Int':<5} {'Rate':<10} {'Maker':<8} {'Taker':<8} {'Short Exch':<12} {'Int':<5} {'Rate':<10} {'Maker':<8} {'Taker':<8} {'Spread/h':<10} {'Annual':<10}")
-        print("-" * 135)
+        print(f"{'#':<3} {'Symbol':<10} {'Exchange':<15} {'Int':<6} {'Rate':<12} {'Maker':<10} {'Taker':<10} {'Spread/h':<12} {'Annual':<10}")
+        print("-" * 90)
 
         # Table rows - showing rates as received for each interval with fees
         for idx, opp in enumerate(top_opportunities, 1):
@@ -115,15 +123,19 @@ async def main():
             short_maker = f"{opp.short_maker_fee*100:.3f}%" if opp.short_maker_fee is not None else "N/A"
             short_taker = f"{opp.short_taker_fee*100:.3f}%" if opp.short_taker_fee is not None else "N/A"
 
-            print(f"{idx:<3} {opp.symbol:<8} {opp.long_exchange:<12} {long_interval:<5} {long_rate_pct:<10} {long_maker:<8} {long_taker:<8} {opp.short_exchange:<12} {short_interval:<5} {short_rate_pct:<10} {short_maker:<8} {short_taker:<8} {spread_pct:<10} {annual_return:<10}")
+            # First line: Long position
+            print(f"{idx:<3} {opp.symbol:<10} Long:{opp.long_exchange:<11} {long_interval:<6} {long_rate_pct:<12} {long_maker:<10} {long_taker:<10} {spread_pct:<12} {annual_return:<10}")
+            # Second line: Short position
+            print(f"{'':3} {'':10} Short:{opp.short_exchange:<10} {short_interval:<6} {short_rate_pct:<12} {short_maker:<10} {short_taker:<10}")
 
-        print("=" * 135)
+        print("=" * 90)
         print()
 
         # Save to JSON
-        with open("arbitrage_opportunities.json", "w") as f:
+        opp_file = f"{export_dir}/arbitrage_opportunities_{timestamp_str}.json"
+        with open(opp_file, "w") as f:
             json.dump([opp.to_dict() for opp in opportunities], f, indent=2)
-        print("💾 Saved opportunities to arbitrage_opportunities.json")
+        print(f"💾 Saved opportunities to {opp_file}")
     else:
         print("ℹ️  No arbitrage opportunities found (rate difference < threshold)")
 
