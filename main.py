@@ -4,9 +4,13 @@ import asyncio
 import json
 import os
 from datetime import datetime
+from colorama import Fore, Style, init
 from collectors import HyperliquidCollector, MEXCCollector, AsterCollector
 from analyzer import FundingRateAnalyzer
 from config import SYMBOLS, EXCHANGES
+
+# Initialize colorama
+init(autoreset=True)
 
 
 async def collect_all_funding_rates():
@@ -25,13 +29,13 @@ async def collect_all_funding_rates():
     async def collect_with_progress(collector):
         """Wrapper to show progress for each exchange"""
         exchange = collector.exchange_name
-        print(f"  → Starting {exchange}...")
+        print(f"{Fore.YELLOW}  → Starting {exchange}...")
         try:
             result = await collector.get_funding_rates(SYMBOLS)
-            print(f"  ✓ {exchange}: {len(result)} rates collected")
+            print(f"{Fore.GREEN}  ✓ {exchange}: {len(result)} rates collected")
             return result
         except Exception as e:
-            print(f"  ✗ {exchange}: Error - {e}")
+            print(f"{Fore.RED}  ✗ {exchange}: Error - {e}")
             return e
 
     tasks = [collect_with_progress(collector) for collector in collectors]
@@ -48,12 +52,13 @@ async def collect_all_funding_rates():
 
 async def main():
     """Main execution"""
-    print("=" * 60)
-    print("CRYPTO FUNDING RATE ARBITRAGE ANALYZER")
-    print("=" * 60)
+    print(f"{Fore.CYAN}{Style.BRIGHT}{'=' * 60}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}CRYPTO FUNDING RATE ARBITRAGE ANALYZER")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{'=' * 60}")
     timestamp = datetime.now()
-    print(f"Timestamp: {timestamp.isoformat()}")
-    print(f"Tracking symbols: {', '.join(SYMBOLS)}")
+    print(f"{Fore.WHITE}Timestamp: {Fore.CYAN}{timestamp.isoformat()}")
+    symbols_count = len(SYMBOLS)
+    print(f"{Fore.WHITE}Tracking {Fore.CYAN}{symbols_count}{Fore.WHITE} symbols")
     print()
 
     # Create exports directory and timestamp for files
@@ -62,14 +67,14 @@ async def main():
     os.makedirs(export_dir, exist_ok=True)
 
     # Collect funding rates
-    print("📊 Collecting funding rates...")
+    print(f"{Fore.CYAN}📊 Collecting funding rates...")
     funding_rates = await collect_all_funding_rates()
 
     if not funding_rates:
-        print("❌ No funding rates collected")
+        print(f"{Fore.RED}❌ No funding rates collected")
         return
 
-    print(f"✅ Collected {len(funding_rates)} funding rates")
+    print(f"{Fore.GREEN}✅ Collected {len(funding_rates)} funding rates")
     print()
 
     # Export current rates to file
@@ -87,7 +92,7 @@ async def main():
             for rate in sorted(funding_rates, key=lambda x: (x.symbol, x.exchange))
         ]
         json.dump(rates_data, f, indent=2)
-    print(f"💾 Saved current rates to {rates_file}")
+    print(f"{Fore.CYAN}💾 Saved: {Fore.WHITE}{rates_file}")
     print()
 
     # Analyze for arbitrage
@@ -95,18 +100,18 @@ async def main():
     opportunities = analyzer.find_arbitrage_opportunities(funding_rates)
 
     if opportunities:
-        print("🎯 ARBITRAGE OPPORTUNITIES FOUND")
-        print("=" * 100)
+        print(f"{Fore.GREEN}{Style.BRIGHT}🎯 ARBITRAGE OPPORTUNITIES FOUND")
+        print(f"{Fore.CYAN}{'=' * 85}")
 
         # Sort by rate difference and show top 5
         top_opportunities = sorted(opportunities, key=lambda x: x.rate_difference, reverse=True)[:5]
 
-        print(f"\nTop 5 opportunities out of {len(opportunities)} total")
-        print("Note: Rates shown are as received for each exchange's funding interval\n")
+        print(f"{Fore.WHITE}Top {Fore.CYAN}5{Fore.WHITE} opportunities (of {Fore.CYAN}{len(opportunities)}{Fore.WHITE} total)")
+        print(f"{Fore.YELLOW}Note: Rates as received for each exchange's funding interval\n")
 
         # Table header
-        print(f"{'#':<3} {'Symbol':<10} {'Exchange':<15} {'Int':<6} {'Rate':<12} {'Maker':<10} {'Taker':<10} {'Spread/h':<12} {'Annual':<10}")
-        print("-" * 90)
+        print(f"{Fore.CYAN}{Style.BRIGHT}{'#':<3} {'Symbol':<9} {'Exch':<13} {'Int':<5} {'Rate':<11} {'Maker':<9} {'Taker':<9} {'Spread/h':<11} {'Annual':<9}")
+        print(f"{Fore.CYAN}{'-' * 85}")
 
         # Table rows - showing rates as received for each interval with fees
         for idx, opp in enumerate(top_opportunities, 1):
@@ -123,21 +128,25 @@ async def main():
             short_maker = f"{opp.short_maker_fee*100:.3f}%" if opp.short_maker_fee is not None else "N/A"
             short_taker = f"{opp.short_taker_fee*100:.3f}%" if opp.short_taker_fee is not None else "N/A"
 
-            # First line: Long position
-            print(f"{idx:<3} {opp.symbol:<10} Long:{opp.long_exchange:<11} {long_interval:<6} {long_rate_pct:<12} {long_maker:<10} {long_taker:<10} {spread_pct:<12} {annual_return:<10}")
-            # Second line: Short position
-            print(f"{'':3} {'':10} Short:{opp.short_exchange:<10} {short_interval:<6} {short_rate_pct:<12} {short_maker:<10} {short_taker:<10}")
+            # Color for spread/annual based on magnitude
+            spread_color = Fore.GREEN if opp.rate_difference > 0.001 else Fore.YELLOW
+            annual_color = Fore.GREEN if opp.annual_return > 0.05 else Fore.YELLOW
 
-        print("=" * 90)
+            # First line: Long position
+            print(f"{Fore.WHITE}{idx:<3} {Fore.YELLOW}{opp.symbol:<9} {Fore.GREEN}L:{opp.long_exchange:<11} {Fore.WHITE}{long_interval:<5} {long_rate_pct:<11} {long_maker:<9} {long_taker:<9} {spread_color}{spread_pct:<11} {annual_color}{annual_return:<9}")
+            # Second line: Short position
+            print(f"{Fore.WHITE}{'':3} {'':9} {Fore.RED}S:{opp.short_exchange:<11} {Fore.WHITE}{short_interval:<5} {short_rate_pct:<11} {short_maker:<9} {short_taker:<9}")
+
+        print(f"{Fore.CYAN}{'=' * 85}")
         print()
 
         # Save to JSON
         opp_file = f"{export_dir}/arbitrage_opportunities_{timestamp_str}.json"
         with open(opp_file, "w") as f:
             json.dump([opp.to_dict() for opp in opportunities], f, indent=2)
-        print(f"💾 Saved opportunities to {opp_file}")
+        print(f"{Fore.CYAN}💾 Saved: {Fore.WHITE}{opp_file}")
     else:
-        print("ℹ️  No arbitrage opportunities found (rate difference < threshold)")
+        print(f"{Fore.YELLOW}ℹ️  No arbitrage opportunities found (rate difference < threshold)")
 
 
 if __name__ == "__main__":
