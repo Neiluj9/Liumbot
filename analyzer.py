@@ -56,7 +56,9 @@ class FundingRateAnalyzer:
                     long_maker_fee=lowest.maker_fee,
                     long_taker_fee=lowest.taker_fee,
                     short_maker_fee=highest.maker_fee,
-                    short_taker_fee=highest.taker_fee
+                    short_taker_fee=highest.taker_fee,
+                    long_next_funding_time=lowest.next_funding_time,
+                    short_next_funding_time=highest.next_funding_time
                 ))
 
         return opportunities

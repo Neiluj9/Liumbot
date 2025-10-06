@@ -65,6 +65,8 @@ class ArbitrageOpportunity:
     long_taker_fee: Optional[float] = None  # Taker fee for long exchange
     short_maker_fee: Optional[float] = None  # Maker fee for short exchange
     short_taker_fee: Optional[float] = None  # Taker fee for short exchange
+    long_next_funding_time: Optional[datetime] = None  # Next funding time for long position
+    short_next_funding_time: Optional[datetime] = None  # Next funding time for short position
 
     @property
     def daily_return(self) -> float:

@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-10-04T19:21:25.920031+00:00",
+  "last_updated": "2025-10-06T18:51:10.600792+00:00",
   "symbols": [
     "0G",
     "1000BONK",
@@ -39,7 +39,6 @@
     "BLAST",
     "BLESS",
     "BLUR",
-    "BLZ",
     "BNB",
     "BNT",
     "BOME",
@@ -53,6 +52,7 @@
     "CELO",
     "CFX",
     "CHILLGUY",
+    "COAI",
     "COMP",
     "CRV",
     "CUDIS",
@@ -110,6 +110,7 @@
     "LINK",
     "LISTA",
     "LTC",
+    "LYN",
     "MANTA",
     "MAV",
     "MAVIA",
@@ -250,7 +251,7 @@
           "funding_interval": 1
         },
         "AIA": {
-          "funding_interval": 4
+          "funding_interval": 1
         },
         "AIO": {
           "funding_interval": 4
@@ -281,6 +282,9 @@
         },
         "CAKE": {
           "funding_interval": 4
+        },
+        "COAI": {
+          "funding_interval": 1
         },
         "CUDIS": {
           "funding_interval": 4
@@ -320,6 +324,9 @@
         },
         "LISTA": {
           "funding_interval": 4
+        },
+        "LYN": {
+          "funding_interval": 1
         },
         "MITO": {
           "funding_interval": 4
@@ -420,26 +427,34 @@
       "funding_interval": 8,
       "symbols": {
         "BTC": {
-          "maker_fee": 0.0,
+          "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
         "ETH": {
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
+        "COAI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
         "ASTER": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "AIA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
         "SOL": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "SUI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "LYN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ENA": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
@@ -447,39 +462,35 @@
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
+        "BNB": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
         "XPL": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "DOOD": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "DOGE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "EVAA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BLESS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "AIA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "ZEC": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ENA": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "BNB": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "taker_fee": 0.0002
         },
         "ADA": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "DOGE": {
+        "BLESS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "LINK": {
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
@@ -487,75 +498,19 @@
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "LINK": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "APT": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "IN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "AVNT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
         "CAKE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "FARTCOIN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "WLD": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
+          "taker_fee": 0.0002
         },
-        "STBL": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "WLFI": {
+        "TAKE": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
+          "taker_fee": 0.0002
         },
-        "MOODENG": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "TRADOOR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ONDO": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "PENGU": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "WIF": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "FF": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "2Z": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "1000BONK": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "LTC": {
+        "APT": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
@@ -563,63 +518,43 @@
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
+        "PENGU": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "Q": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "WLFI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "ONDO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "WLD": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "CELO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "STBL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "AVNT": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
         "ARB": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "HYPE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "NEAR": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "XLM": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "ETHFI": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "LINEA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "APEX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SEI": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "INJ": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "AAVE": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "HBAR": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "TIA": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "MERL": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "EIGEN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "POPCAT": {
+        "WIF": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
@@ -627,235 +562,95 @@
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "ZEN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "EIGEN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "SPX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "OP": {
+        "LTC": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "LDO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "CYBER": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "KAS": {
+        "NEAR": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "BARD": {
+        "STRK": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "HYPE": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "HBAR": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "CRV": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "GRASS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "IMX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ATOM": {
+        "FF": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "UNI": {
+        "SEI": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "EDEN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "EVAA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "MITO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "RENDER": {
+        "1000BONK": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "BCH": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "PROMPT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
         },
-        "DAM": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "XLM": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "MOODENG": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "TIA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "AAVE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "INJ": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
         },
         "FET": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "ZKC": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "LDO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "STRK": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SQD": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "HEMI": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "UB": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "VINE": {
+        "OP": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "ZRO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "JUP": {
+        "LINEA": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
+          "taker_fee": 0.0002
         },
-        "0G": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "W": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "VIRTUAL": {
+        "ETHFI": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
+          "taker_fee": 0.0002
         },
-        "CELO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "GALA": {
+        "IN": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "BERA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "APE": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "MORPHO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "AI16Z": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "BABY": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "IP": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ORDI": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "Q": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "TURBO": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "TRX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "C": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ETC": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "TRB": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "PYTH": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "LAUNCHCOIN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ZORA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "JTO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "taker_fee": 0.0002
         },
         "MNT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BIO": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "ALGO": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "PNUT": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "S": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "HOLO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "HYPER": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "TOSHI": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SUPER": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "MAV": {
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
@@ -863,59 +658,195 @@
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
-        "SNX": {
+        "SPX": {
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
-        "NOT": {
+        "POPCAT": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
+        },
+        "EDEN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "KAS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "ZEN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "APEX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MAV": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "ATOM": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "CRV": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "BARD": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "2Z": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "UNI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "VIRTUAL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "0G": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "REZ": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "HOLO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "HEMI": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "PYTH": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "GALA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "ZRO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "JUP": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "ARIA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "PAXG": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "KAITO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "RENDER": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "CUDIS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "DAM": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "W": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ALGO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "GRASS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BCH": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "COMP": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "IP": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "TRX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ORDI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "S": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "ETC": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "UB": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "DOOD": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "AI16Z": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "TOSHI": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "TRADOOR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "LAUNCHCOIN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SQD": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BERA": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
         },
         "BRETT": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "IO": {
+        "BIO": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "STG": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BOME": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "AR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "IOTA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "KAITO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BANANA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "RSR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "PROMPT": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "PENDLE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "GOAT": {
+        "APE": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
@@ -923,397 +854,477 @@
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "MEME": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "FXS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "POL": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
         "XPIN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "OM": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
+          "taker_fee": 0.0002
         },
-        "CFX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "FTT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SAND": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SUSHI": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "DYDX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "COMP": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "RUNE": {
+        "PENDLE": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
+          "taker_fee": 0.0002
         },
         "STX": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "CHILLGUY": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "POL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "PAXG": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "IO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
         },
-        "B": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "ZKC": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "SPK": {
+        "PNUT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "NOT": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
         "ENS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "ZEREBRO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "CUDIS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "AI": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SYRUP": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "PTB": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "REZ": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SAPIEN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BSV": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SAGA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "XAI": {
+        "TURBO": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
-        },
-        "GRIFFAIN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BTR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "MELANIA": {
-          "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "TST": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "YGG": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "MYRO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "PEOPLE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "NEO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "TOWNS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "TAKE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "GMX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ARIA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "XNY": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
         },
         "MAVIA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "USUAL": {
+        "SNX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "AI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MITO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "IMX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MORPHO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "XNY": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "JTO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "TRB": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "HMSTR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "ZORA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "HYPER": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "VINE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "SAND": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MERL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "CFX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "GOAT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
         },
         "LISTA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "TRUMP": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "CYBER": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "ILV": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ALT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "AR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "MANTA": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "ESPORTS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "B": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "AIO": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "VVV": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SKY": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "NIL": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "MEW": {
+        "BOME": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
-        "PIXEL": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "DYM": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BADGER": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "MOVE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "MINA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "GMT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "OGN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BIGTIME": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ACE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "INIT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "SAHARA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "YZY": {
+        "DYDX": {
           "maker_fee": 0.0,
-          "taker_fee": 0.0
-        },
-        "ME": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "FLOCK": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "USTC": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BLUR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "PROVE": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BAS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "UMA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "RESOLV": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "WCT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "taker_fee": 0.0002
         },
         "LAYER": {
           "maker_fee": 0.0,
           "taker_fee": 0.0
         },
+        "OM": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "SAPIEN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "TST": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SUPER": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "CHILLGUY": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SUSHI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SAGA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "C": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "PTB": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "BANANA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "GMX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "IOTA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MEME": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MINA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "RUNE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "RSR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BAS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "XAI": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "FTT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "GRIFFAIN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "USUAL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "YGG": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MELANIA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "MYRO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "PROVE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "PEOPLE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BTR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ALT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ESPORTS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "NIL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ILV": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SPK": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "FXS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "TOWNS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BABY": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SYRUP": {
+          "maker_fee": 0.0001,
+          "taker_fee": 0.0004
+        },
+        "GMT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "OGN": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ZETA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "AIO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "NEO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "MEW": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "MOVE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "PIXEL": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "DYM": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "VVV": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ZEREBRO": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BLUR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "RDNT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "TRUMP": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "RESOLV": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "USTC": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BIGTIME": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
         "TREE": {
           "maker_fee": 0.0001,
           "taker_fee": 0.0004
         },
+        "ACE": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "INIT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "HMSTR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "SAHARA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BSV": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "WCT": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ME": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "STG": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
         "CATI": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "ZETA": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "FLOCK": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "NXPC": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "SKY": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "SCR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "UMA": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "NTRN": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "RDNT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "TNSR": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "TAG": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
-        "ARK": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BLAST": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "POLYX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ANIME": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ZRC": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+        "SCR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "SOPH": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "YZY": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0
+        },
+        "NXPC": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ZRC": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ARK": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "POLYX": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ANIME": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "TNSR": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "GAS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "BNT": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BADGER": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "BLAST": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "STRAX": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "ORBS": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
-        },
-        "BLZ": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         },
         "REQ": {
-          "maker_fee": 0.0001,
-          "taker_fee": 0.0004
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
+        },
+        "ORBS": {
+          "maker_fee": 0.0,
+          "taker_fee": 0.0002
         }
       }
     }

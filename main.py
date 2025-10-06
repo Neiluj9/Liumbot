@@ -3,7 +3,7 @@
 import asyncio
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from colorama import Fore, Style, init
 from collectors import HyperliquidCollector, MEXCCollector, AsterCollector
 from analyzer import FundingRateAnalyzer
@@ -11,6 +11,61 @@ from config import SYMBOLS, EXCHANGES
 
 # Initialize colorama
 init(autoreset=True)
+
+
+def format_time_until_funding(next_funding_time):
+    """Format time until next funding as countdown string
+
+    Args:
+        next_funding_time: datetime object or None
+
+    Returns:
+        Formatted string like "2h 15m" or "N/A" if None
+    """
+    if next_funding_time is None:
+        return "N/A"
+
+    now = datetime.now(next_funding_time.tzinfo) if next_funding_time.tzinfo else datetime.now()
+    time_diff = next_funding_time - now
+
+    if time_diff.total_seconds() < 0:
+        return "0s"
+
+    total_seconds = int(time_diff.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+
+    if hours > 0:
+        return f"{hours}h {minutes}m"
+    elif minutes > 0:
+        return f"{minutes}m"
+    else:
+        return f"{seconds}s"
+
+
+def get_countdown_color(next_funding_time):
+    """Get color for countdown based on time remaining
+
+    Args:
+        next_funding_time: datetime object or None
+
+    Returns:
+        Colorama color constant
+    """
+    if next_funding_time is None:
+        return Fore.WHITE
+
+    now = datetime.now(next_funding_time.tzinfo) if next_funding_time.tzinfo else datetime.now()
+    time_diff = next_funding_time - now
+    hours_remaining = time_diff.total_seconds() / 3600
+
+    if hours_remaining < 1:
+        return Fore.RED
+    elif hours_remaining < 4:
+        return Fore.YELLOW
+    else:
+        return Fore.GREEN
 
 
 async def collect_all_funding_rates():
@@ -101,7 +156,7 @@ async def main():
 
     if opportunities:
         print(f"{Fore.GREEN}{Style.BRIGHT}🎯 ARBITRAGE OPPORTUNITIES FOUND")
-        print(f"{Fore.CYAN}{'=' * 85}")
+        print(f"{Fore.CYAN}{'=' * 98}")
 
         # Sort by rate difference and show top 5
         top_opportunities = sorted(opportunities, key=lambda x: x.rate_difference, reverse=True)[:5]
@@ -110,8 +165,8 @@ async def main():
         print(f"{Fore.YELLOW}Note: Rates as received for each exchange's funding interval\n")
 
         # Table header
-        print(f"{Fore.CYAN}{Style.BRIGHT}{'#':<3} {'Symbol':<9} {'Exch':<13} {'Int':<5} {'Rate':<11} {'Maker':<9} {'Taker':<9} {'Spread/h':<11} {'Annual':<9}")
-        print(f"{Fore.CYAN}{'-' * 85}")
+        print(f"{Fore.CYAN}{Style.BRIGHT}{'#':<3} {'Symbol':<9} {'Exch':<13} {'Maker':<9} {'Taker':<9} {'Int':<5} {'Rate':<11} {'Next Funding':<13} {'Spread/h':<11} {'Annual':<9}")
+        print(f"{Fore.CYAN}{'-' * 98}")
 
         # Table rows - showing rates as received for each interval with fees
         for idx, opp in enumerate(top_opportunities, 1):
@@ -128,16 +183,22 @@ async def main():
             short_maker = f"{opp.short_maker_fee*100:.3f}%" if opp.short_maker_fee is not None else "N/A"
             short_taker = f"{opp.short_taker_fee*100:.3f}%" if opp.short_taker_fee is not None else "N/A"
 
+            # Format countdowns
+            long_countdown = format_time_until_funding(opp.long_next_funding_time)
+            short_countdown = format_time_until_funding(opp.short_next_funding_time)
+            long_countdown_color = get_countdown_color(opp.long_next_funding_time)
+            short_countdown_color = get_countdown_color(opp.short_next_funding_time)
+
             # Color for spread/annual based on magnitude
             spread_color = Fore.GREEN if opp.rate_difference > 0.001 else Fore.YELLOW
             annual_color = Fore.GREEN if opp.annual_return > 0.05 else Fore.YELLOW
 
             # First line: Long position
-            print(f"{Fore.WHITE}{idx:<3} {Fore.YELLOW}{opp.symbol:<9} {Fore.GREEN}L:{opp.long_exchange:<11} {Fore.WHITE}{long_interval:<5} {long_rate_pct:<11} {long_maker:<9} {long_taker:<9} {spread_color}{spread_pct:<11} {annual_color}{annual_return:<9}")
+            print(f"{Fore.WHITE}{idx:<3} {Fore.YELLOW}{opp.symbol:<9} {Fore.GREEN}L:{opp.long_exchange:<11} {Fore.WHITE}{long_maker:<9} {long_taker:<9} {long_interval:<5} {long_rate_pct:<11} {long_countdown_color}{long_countdown:<13} {spread_color}{spread_pct:<11} {annual_color}{annual_return:<9}")
             # Second line: Short position
-            print(f"{Fore.WHITE}{'':3} {'':9} {Fore.RED}S:{opp.short_exchange:<11} {Fore.WHITE}{short_interval:<5} {short_rate_pct:<11} {short_maker:<9} {short_taker:<9}")
+            print(f"{Fore.WHITE}{'':3} {'':9} {Fore.RED}S:{opp.short_exchange:<11} {Fore.WHITE}{short_maker:<9} {short_taker:<9} {short_interval:<5} {short_rate_pct:<11} {short_countdown_color}{short_countdown:<13}")
 
-        print(f"{Fore.CYAN}{'=' * 85}")
+        print(f"{Fore.CYAN}{'=' * 98}")
         print()
 
         # Save to JSON
