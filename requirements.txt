@@ -4,3 +4,5 @@ websockets>=10.0
 requests>=2.28
 curl_cffi>=0.6.0
 colorama>=0.4.6
+matplotlib>=3.5.0  # Optional: for plot_spread.py
+protobuf>=4.21.0  # Required: for MEXC WebSocket (protobuf format)

@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 from collectors.base import BaseCollector
 from models import FundingRate
-from config import get_fees, get_funding_interval
+from config import get_fees, get_funding_interval, ASTER_API_BASE
 
 
 class AsterCollector(BaseCollector):
@@ -13,7 +13,7 @@ class AsterCollector(BaseCollector):
 
     def __init__(self):
         super().__init__("aster")
-        self.api_base = "https://fapi.asterdex.com"
+        self.api_base = ASTER_API_BASE
 
     def _normalize_aster_symbol(self, symbol: str) -> str:
         """Convert standard symbol to Aster format (e.g., BTC -> BTCUSDT)"""

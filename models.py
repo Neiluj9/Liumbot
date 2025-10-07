@@ -6,6 +6,24 @@ from typing import Optional
 
 
 @dataclass
+class SymbolMetadata:
+    """Market metadata for a trading symbol"""
+    symbol: str
+    exchange: str
+    tick_size: float  # Minimum price increment (e.g., 0.01)
+    price_precision: int  # Number of decimal places for price
+    quantity_precision: int = 8  # Number of decimal places for quantity (default 8)
+
+    def format_price(self, price: float) -> str:
+        """Format price according to exchange precision"""
+        return f"{price:.{self.price_precision}f}"
+
+    def format_quantity(self, quantity: float) -> str:
+        """Format quantity according to exchange precision"""
+        return f"{quantity:.{self.quantity_precision}f}"
+
+
+@dataclass
 class FundingRate:
     """Normalized funding rate data structure"""
     exchange: str
@@ -29,11 +47,6 @@ class FundingRate:
     def hourly_rate(self) -> float:
         """Convert funding rate to hourly equivalent for comparison"""
         return self.funding_rate / self.funding_interval_hours
-
-    @property
-    def daily_rate(self) -> float:
-        """Convert funding rate to daily equivalent"""
-        return self.hourly_rate * 24
 
     def to_dict(self):
         """Convert to dictionary"""

@@ -20,9 +20,3 @@ class BaseCollector(ABC):
     async def get_funding_history(self, symbol: str, start_time: int, end_time: int = None) -> List[FundingRate]:
         """Get historical funding rates for a symbol"""
         pass
-
-    def normalize_symbol(self, symbol: str) -> str:
-        """Normalize symbol name across exchanges"""
-        # Remove common suffixes and standardize
-        symbol = symbol.upper().replace("USDT", "").replace("USD", "").replace("-PERP", "")
-        return symbol

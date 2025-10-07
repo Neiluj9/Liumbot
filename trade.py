@@ -21,7 +21,7 @@ import argparse
 import time
 import sys
 from typing import Optional
-from colorama import Fore, Style, init
+from colorama import Fore, init
 
 from config import TRADING_CONFIG
 from executors import HyperliquidExecutor, MEXCExecutor, AsterExecutor

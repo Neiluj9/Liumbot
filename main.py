@@ -3,7 +3,7 @@
 import asyncio
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from colorama import Fore, Style, init
 from collectors import HyperliquidCollector, MEXCCollector, AsterCollector
 from analyzer import FundingRateAnalyzer
@@ -116,10 +116,12 @@ async def main():
     print(f"{Fore.WHITE}Tracking {Fore.CYAN}{symbols_count}{Fore.WHITE} symbols")
     print()
 
-    # Create exports directory and timestamp for files
+    # Create exports directories and timestamp for files
     timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
-    export_dir = "exports"
-    os.makedirs(export_dir, exist_ok=True)
+    rates_dir = "exports/funding_rates"
+    opportunities_dir = "exports/arbitrage_opportunities"
+    os.makedirs(rates_dir, exist_ok=True)
+    os.makedirs(opportunities_dir, exist_ok=True)
 
     # Collect funding rates
     print(f"{Fore.CYAN}📊 Collecting funding rates...")
@@ -133,7 +135,7 @@ async def main():
     print()
 
     # Export current rates to file
-    rates_file = f"{export_dir}/current_funding_rates_{timestamp_str}.json"
+    rates_file = f"{rates_dir}/current_funding_rates_{timestamp_str}.json"
     with open(rates_file, "w") as f:
         rates_data = [
             {
@@ -202,7 +204,7 @@ async def main():
         print()
 
         # Save to JSON
-        opp_file = f"{export_dir}/arbitrage_opportunities_{timestamp_str}.json"
+        opp_file = f"{opportunities_dir}/arbitrage_opportunities_{timestamp_str}.json"
         with open(opp_file, "w") as f:
             json.dump([opp.to_dict() for opp in opportunities], f, indent=2)
         print(f"{Fore.CYAN}💾 Saved: {Fore.WHITE}{opp_file}")
