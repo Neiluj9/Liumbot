@@ -1,108 +1,115 @@
-# Crypto Funding Rate Arbitrage
+# Crypto Funding Rate Arbitrage System
 
-Système de collecte et d'analyse des funding rates pour l'arbitrage sur les exchanges crypto.
+Système complet de collecte et d'analyse des funding rates pour l'arbitrage sur les exchanges crypto, avec monitoring en temps réel et exécution automatisée de trades.
 
-## Exchanges Supportés
-
-- ✅ **Hyperliquid**: API complète, funding toutes les heures
-- ✅ **MEXC**: API complète, funding toutes les 8h (00:00, 08:00, 16:00 UTC)
-- ✅ **Aster**: API indépendante, funding toutes les 8h (certains symbols 4h ou 1h)
-
-## Installation
+## 🚀 Quick Start
 
 ```bash
+# Installation
 pip install -r requirements.txt
+
+# Analyser les funding rates
+python scripts/funding_analyzer.py
+
+# Monitor le spread en temps réel
+python scripts/spread_monitor.py --symbol BTC --exchange-a hyperliquid --exchange-b mexc
 ```
 
-## Utilisation
+## 📚 Documentation
 
-### Collecte et analyse en temps réel
+- **[Installation](docs/installation.md)** - Guide d'installation complet
+- **[Exemples d'utilisation](docs/examples.md)** - Exemples pratiques et cas d'usage
+- **[Spread Monitor](docs/spread-monitor.md)** - Guide du monitoring en temps réel
+
+## 🎯 Fonctionnalités
+
+- ✅ **Collecte de funding rates** via REST API (Hyperliquid, MEXC, Aster)
+- ✅ **Analyse d'arbitrage** avec calcul des opportunités et rendements annualisés
+- ✅ **Monitor temps réel** via WebSocket avec streaming des orderbooks
+- ✅ **Visualisation** avec génération automatique de graphiques
+- ✅ **Exécution de trades** synchronisés entre exchanges
+- ✅ **Gestion des symboles** avec mise à jour automatique
+
+## 🏗️ Architecture
+
+```
+liumbot2/
+├── collectors/
+│   ├── rest/              # Collecteurs REST API
+│   └── websocket/         # Collecteurs WebSocket temps réel
+├── executors/             # Exécuteurs de trades
+├── scripts/               # Scripts CLI
+│   ├── funding_analyzer.py
+│   ├── spread_monitor.py
+│   ├── spread_plotter.py
+│   ├── trade_cli.py
+│   └── update_symbols.py
+├── utils/                 # Utilitaires
+├── docs/                  # Documentation
+├── config.py              # Configuration
+├── models.py              # Modèles de données
+└── analyzer.py            # Logique d'analyse
+```
+
+## 💡 Usage
+
+### Analyse des Funding Rates
 
 ```bash
-python main.py
+python scripts/funding_analyzer.py
 ```
 
-Cela va :
-1. Collecter les funding rates actuels de Hyperliquid et MEXC
-2. Identifier les opportunités d'arbitrage
-3. Calculer les statistiques
-4. Sauvegarder les opportunités dans `arbitrage_opportunities.json`
+Collecte les funding rates de tous les exchanges activés, analyse les opportunités d'arbitrage et exporte les résultats vers `exports/`.
 
-### Configuration
+### Monitor de Spread Temps Réel
 
-Modifier `config.py` pour ajuster :
-- `SYMBOLS`: Liste des cryptos à suivre
-- `EXCHANGES`: Activer/désactiver les exchanges
-
-## Structure du Projet
-
-```
-.
-├── config.py              # Configuration
-├── models.py              # Modèles de données (FundingRate, ArbitrageOpportunity)
-├── collectors/
-│   ├── base.py           # Classe de base pour collecteurs
-│   ├── hyperliquid.py    # Collecteur Hyperliquid
-│   └── mexc.py           # Collecteur MEXC
-├── analyzer.py           # Analyse et détection d'arbitrage
-└── main.py              # Script principal
+```bash
+python scripts/spread_monitor.py --symbol BTC --exchange-a hyperliquid --exchange-b mexc --interval 100
 ```
 
-## API Endpoints
+Surveille le spread de prix entre deux exchanges via WebSocket et génère automatiquement des graphiques.
 
-### Hyperliquid
-- Endpoint: `https://api.hyperliquid.xyz/info`
-- Funding rates prédictifs: `{"type": "predictedFundings"}`
-- Historique: `{"type": "fundingHistory", "coin": "BTC", "startTime": ...}`
+### Trading
 
-### MEXC
-- Base: `https://contract.mexc.com/api/v1/contract`
-- Rate actuel: `/funding_rate/{symbol}`
-- Historique: `/funding_rate/history?symbol={symbol}&page_num=1&page_size=100`
+```bash
+# Ouvrir une position
+python scripts/trade_cli.py open \
+    --exchange1 hyperliquid --side1 long \
+    --exchange2 mexc --side2 short \
+    --symbol BTC --size 100 --price 50000
 
-### Aster
-- Base: `https://fapi.asterdex.com`
-- Rate actuel: `/fapi/v1/premiumIndex` (contient `lastFundingRate`)
-- Historique: `/fapi/v1/fundingRate?symbol={symbol}&startTime=...`
-
-## Exemple de Sortie
-
-```
-==================================================================================================================
-CRYPTO FUNDING RATE ARBITRAGE ANALYZER
-==================================================================================================================
-Timestamp: 2025-10-02T10:30:00
-Tracking symbols: BTC, ETH, SOL, ...
-
-📊 Collecting funding rates...
-  → Starting Hyperliquid...
-  ✓ Hyperliquid: 150 rates collected
-  → Starting MEXC...
-  ✓ MEXC: 120 rates collected
-  → Starting Aster...
-  ✓ Aster: 180 rates collected
-✅ Collected 450 funding rates
-
-💾 Saved current rates to current_funding_rates.json
-
-🎯 ARBITRAGE OPPORTUNITIES FOUND
-====================================================================================================
-
-Top 5 opportunities out of 25 total
-
-#   Symbol     Long Exchange    Long Rate    Short Exchange   Short Rate   Spread       Annual Return
-----------------------------------------------------------------------------------------------------
-1   BTC        hyperliquid      0.0125%      mexc             0.0350%      0.0225%      24.66%
-2   ETH        hyperliquid     -0.0050%      aster            0.0200%      0.0250%      27.38%
-3   SOL        mexc             0.0100%      aster            0.0280%      0.0180%      19.71%
-4   AVAX       hyperliquid      0.0080%      mexc             0.0220%      0.0140%      15.33%
-5   ARB        aster           -0.0020%      hyperliquid      0.0110%      0.0130%      14.24%
-====================================================================================================
-
-💾 Saved opportunities to arbitrage_opportunities.json
+# Fermer une position
+python scripts/trade_cli.py close \
+    --exchange1 mexc --side1 close_short \
+    --exchange2 hyperliquid --side2 close_long \
+    --symbol BTC --size 100 --price 50000
 ```
 
-## Stratégie d'Arbitrage
+### Mise à Jour des Symboles
+
+```bash
+python scripts/update_symbols.py
+```
+
+Met à jour `symbols_data.json` avec les derniers symboles disponibles sur chaque exchange.
+
+## 📊 Exchanges Supportés
+
+| Exchange | REST API | WebSocket | Funding Interval |
+|----------|----------|-----------|------------------|
+| **Hyperliquid** | ✅ | ✅ | 1h |
+| **MEXC** | ✅ | ✅ | 8h (00:00, 08:00, 16:00 UTC) |
+| **Aster** | ✅ | ✅ | 8h (certains 4h ou 1h) |
+
+## ⚙️ Configuration
+
+Modifiez `config.py` pour ajuster :
+
+- **`SYMBOLS`** - Liste des cryptos à suivre (225+ symboles)
+- **`EXCHANGES`** - Activer/désactiver les exchanges
+- **`TRADING_CONFIG`** - Credentials pour l'exécution de trades
+
+## 📈 Stratégie d'Arbitrage
 
 1. **Long** sur l'exchange avec le funding rate le plus BAS (vous recevez le funding)
 2. **Short** sur l'exchange avec le funding rate le plus HAUT (vous recevez le funding)
@@ -110,10 +117,32 @@ Top 5 opportunities out of 25 total
 
 ⚠️ **Risques** : Exposition au prix, frais de transaction, liquidité, écarts de prix entre exchanges
 
-## Todo
+## 🔧 Développement
 
-- [ ] WebSocket pour données temps réel (Aster supporte wss://fstream.asterdex.com)
-- [ ] Base de données pour historique
-- [ ] Alertes automatiques (Telegram/Discord)
-- [ ] Backtesting sur données historiques
-- [ ] Calculer les coûts réels (frais de trading, slippage)
+### Structure des Modules
+
+- **collectors/rest/** - Collecteurs REST héritant de `BaseCollector`
+- **collectors/websocket/** - Collecteurs WebSocket héritant de `WebSocketCollector`
+- **executors/** - Exécuteurs de trades héritant de `BaseExecutor`
+- **scripts/** - Scripts CLI autonomes
+- **utils/** - Fonctions utilitaires réutilisables
+
+### Ajouter un Nouvel Exchange
+
+1. Créer `collectors/rest/your_exchange.py` héritant de `BaseCollector`
+2. Implémenter `get_funding_rates()` et `get_funding_history()`
+3. (Optionnel) Créer `collectors/websocket/your_exchange_ws.py`
+4. Ajouter la config dans `config.py`
+5. Importer dans les scripts nécessaires
+
+## 📄 Licence
+
+Ce projet est fourni à des fins éducatives. Utilisez-le à vos propres risques.
+
+## 🤝 Contributing
+
+Les contributions sont les bienvenues ! Veuillez consulter la documentation pour les détails d'implémentation.
+
+---
+
+Pour plus d'informations, consultez la [documentation complète](docs/).

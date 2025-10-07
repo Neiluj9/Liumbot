@@ -4,7 +4,7 @@ import asyncio
 import aiohttp
 from datetime import datetime
 from typing import List
-from collectors.base import BaseCollector
+from collectors.rest.base import BaseCollector
 from models import FundingRate
 from config import MEXC_API_BASE, get_fees
 

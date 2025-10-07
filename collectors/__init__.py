@@ -1,7 +1,5 @@
 """Exchange collectors package"""
 
-from collectors.hyperliquid import HyperliquidCollector
-from collectors.mexc import MEXCCollector
-from collectors.aster import AsterCollector
+from collectors.rest import HyperliquidCollector, MEXCCollector, AsterCollector
 
 __all__ = ["HyperliquidCollector", "MEXCCollector", "AsterCollector"]

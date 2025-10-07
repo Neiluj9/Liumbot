@@ -4,24 +4,28 @@ Trading CLI for executing synchronized orders across exchanges.
 
 Usage:
     # Open position: limit on exchange1, market on exchange2 after fill
-    python trade.py open --exchange1 hyperliquid --side1 long \\
-                          --exchange2 mexc --side2 short \\
-                          --symbol BTC --size 100 --price 50000
+    python trade_cli.py open --exchange1 hyperliquid --side1 long \\
+                              --exchange2 mexc --side2 short \\
+                              --symbol BTC --size 100 --price 50000
 
     # Close position
-    python trade.py close --exchange1 mexc --side1 close_short \\
-                           --exchange2 hyperliquid --side2 close_long \\
-                           --symbol BTC --size 100 --price 50000
+    python trade_cli.py close --exchange1 mexc --side1 close_short \\
+                               --exchange2 hyperliquid --side2 close_long \\
+                               --symbol BTC --size 100 --price 50000
 
     # Cancel order
-    python trade.py cancel --exchange hyperliquid --order-id 123456 --symbol BTC
+    python trade_cli.py cancel --exchange hyperliquid --order-id 123456 --symbol BTC
 """
 
 import argparse
 import time
 import sys
+from pathlib import Path
 from typing import Optional
 from colorama import Fore, init
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from config import TRADING_CONFIG
 from executors import HyperliquidExecutor, MEXCExecutor, AsterExecutor

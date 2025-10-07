@@ -6,7 +6,7 @@ import os
 import aiohttp
 from typing import Optional
 from datetime import datetime
-from collectors.websocket_base import WebSocketCollector, OrderbookData
+from collectors.websocket.base import WebSocketCollector, OrderbookData
 from models import SymbolMetadata
 
 # Add protobuf path

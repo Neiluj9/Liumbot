@@ -4,14 +4,22 @@ import asyncio
 import csv
 import argparse
 import os
+import sys
 import subprocess
+from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict
 from colorama import Fore, Style, init
-from collectors.hyperliquid_ws import HyperliquidWebSocket
-from collectors.aster_ws import AsterWebSocket
-from collectors.mexc_futures_ws import MEXCFuturesWebSocket
-from collectors.websocket_base import OrderbookData
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from collectors.websocket import (
+    HyperliquidWebSocket,
+    AsterWebSocket,
+    MEXCFuturesWebSocket,
+    OrderbookData
+)
 
 # Initialize colorama
 init(autoreset=True)
@@ -178,11 +186,12 @@ class SpreadMonitor:
             ])
 
     def _generate_plot(self):
-        """Generate plot from CSV file using plot_spread.py"""
+        """Generate plot from CSV file using spread_plotter.py"""
         try:
             print(f"\n{Fore.CYAN}Generating spread plot...")
+            plotter_path = Path(__file__).parent / "spread_plotter.py"
             result = subprocess.run(
-                ["python", "plot_spread.py", self.csv_filename],
+                ["python", str(plotter_path), self.csv_filename],
                 capture_output=True,
                 text=True,
                 timeout=30
@@ -202,7 +211,7 @@ class SpreadMonitor:
         except subprocess.TimeoutExpired:
             print(f"{Fore.RED}✗ Plot generation timed out")
         except FileNotFoundError:
-            print(f"{Fore.RED}✗ plot_spread.py not found")
+            print(f"{Fore.RED}✗ spread_plotter.py not found")
         except Exception as e:
             print(f"{Fore.RED}✗ Error generating plot: {e}")
 

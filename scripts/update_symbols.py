@@ -3,8 +3,13 @@
 import asyncio
 import aiohttp
 import json
+import sys
+from pathlib import Path
 from datetime import datetime, timezone
 from typing import Set, Dict, Tuple
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def get_hyperliquid_symbols() -> Set[str]:
@@ -218,8 +223,9 @@ async def main():
         }
     }
 
-    # Save to file
-    with open("symbols_data.json", "w") as f:
+    # Save to file in parent directory
+    output_file = Path(__file__).parent.parent / "symbols_data.json"
+    with open(output_file, "w") as f:
         json.dump(symbols_data, f, indent=2)
 
     print("=" * 60)

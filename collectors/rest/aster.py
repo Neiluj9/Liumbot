@@ -3,7 +3,7 @@
 import aiohttp
 from datetime import datetime
 from typing import List
-from collectors.base import BaseCollector
+from collectors.rest.base import BaseCollector
 from models import FundingRate
 from config import get_fees, get_funding_interval, ASTER_API_BASE
 
