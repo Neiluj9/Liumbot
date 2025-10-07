@@ -4,6 +4,7 @@ import asyncio
 import csv
 import argparse
 import os
+import subprocess
 from datetime import datetime
 from typing import Optional, Dict
 from colorama import Fore, Style, init
@@ -176,6 +177,35 @@ class SpreadMonitor:
                 f"{spread_pct:.4f}"
             ])
 
+    def _generate_plot(self):
+        """Generate plot from CSV file using plot_spread.py"""
+        try:
+            print(f"\n{Fore.CYAN}Generating spread plot...")
+            result = subprocess.run(
+                ["python", "plot_spread.py", self.csv_filename],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode == 0:
+                print(f"{Fore.GREEN}✓ Plot generated successfully")
+                # Print the output which contains the PNG filename
+                if result.stdout:
+                    for line in result.stdout.strip().split('\n'):
+                        if 'Plot saved to:' in line or 'Spread Statistics:' in line or line.strip().startswith(('Average:', 'Maximum:', 'Minimum:', 'Data points:')):
+                            print(f"{Fore.WHITE}{line}")
+            else:
+                print(f"{Fore.RED}✗ Failed to generate plot")
+                if result.stderr:
+                    print(f"{Fore.RED}{result.stderr}")
+        except subprocess.TimeoutExpired:
+            print(f"{Fore.RED}✗ Plot generation timed out")
+        except FileNotFoundError:
+            print(f"{Fore.RED}✗ plot_spread.py not found")
+        except Exception as e:
+            print(f"{Fore.RED}✗ Error generating plot: {e}")
+
     async def start(self):
         """Start monitoring"""
         print(f"{Fore.CYAN}{Style.BRIGHT}{'=' * 80}")
@@ -186,6 +216,12 @@ class SpreadMonitor:
         print(f"{Fore.WHITE}Exchange B: {Fore.RED}{self.exchange_b.upper()}")
         print(f"{Fore.WHITE}Update interval: {Fore.CYAN}{int(self.update_interval * 1000)}ms")
         print(f"{Fore.WHITE}Logging to: {Fore.CYAN}{self.csv_filename}")
+        print()
+        print(f"{Fore.CYAN}{Style.DIM}📊 Price Terminology:")
+        print(f"{Fore.GREEN}  • BID {Fore.WHITE}= Highest price buyers are willing to pay (you can SELL at this price)")
+        print(f"{Fore.RED}  • ASK {Fore.WHITE}= Lowest price sellers are asking for (you can BUY at this price)")
+        print(f"{Fore.YELLOW}  • Spread calculation: BID_A - ASK_B")
+        print(f"{Fore.WHITE}  • Positive spread = profit opportunity (buy on B, sell on A)")
 
         # Fetch metadata to determine price precision
         print(f"{Fore.CYAN}Fetching symbol metadata...")
@@ -219,6 +255,9 @@ class SpreadMonitor:
             await self.ws_a.disconnect()
             await self.ws_b.disconnect()
             print(f"{Fore.GREEN}Monitor stopped. Data saved to {self.csv_filename}")
+
+            # Auto-generate plot
+            self._generate_plot()
 
 
 async def main():
