@@ -112,7 +112,10 @@ async def monitor_order_websocket(exchange_name: str, order_id: str, symbol: str
         # New fill detected
         if filled_qty > last_filled_qty:
             new_fill = filled_qty - last_filled_qty
-            print(f"{Fore.GREEN}✓ Partial fill: {new_fill:.4f} (Total: {filled_qty:.4f}/{order.size})")
+            # Check if fully filled or partial
+            is_full = (filled_qty >= order.size)
+            fill_type = "Full fill" if is_full else "Partial fill"
+            print(f"{Fore.GREEN}✓ {fill_type}: {new_fill:.4f} (Total: {filled_qty:.4f}/{order.size})")
 
             # Place market order on exchange2 for the filled amount
             print(f"{Fore.YELLOW}[3/3] Placing MARKET order on {args.exchange2} for {new_fill:.4f}...")
@@ -188,15 +191,61 @@ async def monitor_order_websocket(exchange_name: str, order_id: str, symbol: str
     return last_filled_qty
 
 
-def open_position_sync(args):
-    """Open position with REST polling (for Hyperliquid)"""
+def handle_interruption(executor, order_id, symbol, exchange_name):
+    """Handle order status check and cancellation on interruption.
+
+    Args:
+        executor: Exchange executor instance
+        order_id: Order ID to check
+        symbol: Trading symbol
+        exchange_name: Exchange name for display
+
+    Returns:
+        bool: True if order was handled successfully
+    """
+    try:
+        print(f"{Fore.CYAN}Checking order status via REST API...")
+        status = executor.get_order_status(order_id, symbol)
+
+        print(f"{Fore.CYAN}Order Status: {status.status.value}")
+        filled = status.filled_quantity
+
+        if filled > 0:
+            print(f"{Fore.YELLOW}⚠ Order partially filled: {filled}/{status.size}")
+            print(f"{Fore.YELLOW}⚠ You may have an unhedged position!")
+            print(f"{Fore.CYAN}Order ID {order_id} is still active on {exchange_name}")
+            print(f"{Fore.CYAN}To cancel: python scripts/trade_cli.py cancel --exchange {exchange_name} --order-id {order_id} --symbol {symbol}")
+            return False
+        else:
+            # No fills, cancel the order
+            print(f"{Fore.YELLOW}Cancelling unfilled order {order_id}...")
+            if executor.cancel_order(order_id, symbol):
+                print(f"{Fore.GREEN}✓ Order cancelled successfully")
+                return True
+            else:
+                print(f"{Fore.RED}✗ Failed to cancel order")
+                print(f"{Fore.CYAN}To cancel manually: python scripts/trade_cli.py cancel --exchange {exchange_name} --order-id {order_id} --symbol {symbol}")
+                return False
+    except Exception as e:
+        print(f"{Fore.RED}✗ Error checking/cancelling order: {str(e)}")
+        print(f"{Fore.CYAN}To cancel manually: python scripts/trade_cli.py cancel --exchange {exchange_name} --order-id {order_id} --symbol {symbol}")
+        return False
+
+
+def print_position_header(args):
+    """Print position opening header."""
     print(f"{Fore.CYAN}Opening position...")
     print(f"Exchange 1: {args.exchange1} ({args.side1})")
     print(f"Exchange 2: {args.exchange2} ({args.side2})")
-    print(f"Symbol: {args.symbol}, Size: {args.size} USDT")
+    print(f"Symbol: {args.symbol}, Size: {args.size}")
     if args.price:
         print(f"Limit Price: {args.price}")
     print()
+
+
+def open_position_sync(args):
+    """Open position with REST polling (for Hyperliquid)"""
+    print_position_header(args)
 
     # Get executors
     executor1 = get_executor(args.exchange1)
@@ -244,7 +293,10 @@ def open_position_sync(args):
             # New fill detected
             if filled_qty > last_filled_qty:
                 new_fill = filled_qty - last_filled_qty
-                print(f"{Fore.GREEN}✓ Partial fill: {new_fill:.4f} (Total: {filled_qty:.4f}/{status.size})")
+                # Check if fully filled or partial
+                is_full = (filled_qty >= status.size)
+                fill_type = "Full fill" if is_full else "Partial fill"
+                print(f"{Fore.GREEN}✓ {fill_type}: {new_fill:.4f} (Total: {filled_qty:.4f}/{status.size})")
 
                 # Step 3: Place market order on exchange2 for the filled amount
                 print(f"{Fore.YELLOW}[3/3] Placing MARKET order on {args.exchange2} for {new_fill:.4f}...")
@@ -284,24 +336,7 @@ def open_position_sync(args):
     except KeyboardInterrupt:
         print(f"\n{Fore.YELLOW}⚠ Interrupted by user")
         if order1:
-            # Check if order has any fills
-            try:
-                status = executor1.get_order_status(order1.order_id, args.symbol)
-                if status.filled_quantity > 0:
-                    print(f"{Fore.YELLOW}⚠ Order partially filled: {status.filled_quantity}/{status.size}")
-                    print(f"{Fore.CYAN}Order ID {order1.order_id} is still active on {args.exchange1}")
-                    print(f"{Fore.CYAN}To cancel: python scripts/trade_cli.py cancel --exchange {args.exchange1} --order-id {order1.order_id} --symbol {args.symbol}")
-                else:
-                    # No fills, cancel the order
-                    print(f"{Fore.YELLOW}Cancelling unfilled order {order1.order_id}...")
-                    if executor1.cancel_order(order1.order_id, args.symbol):
-                        print(f"{Fore.GREEN}✓ Order cancelled successfully")
-                    else:
-                        print(f"{Fore.RED}✗ Failed to cancel order")
-                        print(f"{Fore.CYAN}To cancel manually: python scripts/trade_cli.py cancel --exchange {args.exchange1} --order-id {order1.order_id} --symbol {args.symbol}")
-            except Exception as e:
-                print(f"{Fore.RED}✗ Error checking/cancelling order: {str(e)}")
-                print(f"{Fore.CYAN}To cancel manually: python scripts/trade_cli.py cancel --exchange {args.exchange1} --order-id {order1.order_id} --symbol {args.symbol}")
+            handle_interruption(executor1, order1.order_id, args.symbol, args.exchange1)
         sys.exit(1)
 
     except Exception as e:
@@ -313,13 +348,7 @@ def open_position_sync(args):
 
 async def open_position_async(args):
     """Open position with WebSocket monitoring (for Aster/MEXC)"""
-    print(f"{Fore.CYAN}Opening position...")
-    print(f"Exchange 1: {args.exchange1} ({args.side1})")
-    print(f"Exchange 2: {args.exchange2} ({args.side2})")
-    print(f"Symbol: {args.symbol}, Size: {args.size} USDT")
-    if args.price:
-        print(f"Limit Price: {args.price}")
-    print()
+    print_position_header(args)
 
     # Get executors
     executor1 = get_executor(args.exchange1)
@@ -357,24 +386,7 @@ async def open_position_async(args):
     except (KeyboardInterrupt, asyncio.CancelledError):
         print(f"\n{Fore.YELLOW}⚠ Interrupted by user")
         if order1:
-            # Check if order has any fills
-            try:
-                status = executor1.get_order_status(order1.order_id, args.symbol)
-                if status.filled_quantity > 0:
-                    print(f"{Fore.YELLOW}⚠ Order partially filled: {status.filled_quantity}/{status.size}")
-                    print(f"{Fore.CYAN}Order ID {order1.order_id} is still active on {args.exchange1}")
-                    print(f"{Fore.CYAN}To cancel: python scripts/trade_cli.py cancel --exchange {args.exchange1} --order-id {order1.order_id} --symbol {args.symbol}")
-                else:
-                    # No fills, cancel the order
-                    print(f"{Fore.YELLOW}Cancelling unfilled order {order1.order_id}...")
-                    if executor1.cancel_order(order1.order_id, args.symbol):
-                        print(f"{Fore.GREEN}✓ Order cancelled successfully")
-                    else:
-                        print(f"{Fore.RED}✗ Failed to cancel order")
-                        print(f"{Fore.CYAN}To cancel manually: python scripts/trade_cli.py cancel --exchange {args.exchange1} --order-id {order1.order_id} --symbol {args.symbol}")
-            except Exception as e:
-                print(f"{Fore.RED}✗ Error checking/cancelling order: {str(e)}")
-                print(f"{Fore.CYAN}To cancel manually: python scripts/trade_cli.py cancel --exchange {args.exchange1} --order-id {order1.order_id} --symbol {args.symbol}")
+            handle_interruption(executor1, order1.order_id, args.symbol, args.exchange1)
         raise  # Re-raise to propagate to open_position()
 
     except Exception as e:
@@ -455,7 +467,7 @@ def main():
     open_parser.add_argument('--exchange2', required=True, help='Second exchange (market order)')
     open_parser.add_argument('--side2', required=True, help='Side for exchange2 (long/short)')
     open_parser.add_argument('--symbol', required=True, help='Trading symbol (normalized, e.g., BTC)')
-    open_parser.add_argument('--size', type=float, required=True, help='Order size in USDT')
+    open_parser.add_argument('--size', type=float, required=True, help='Order size in symbol units (e.g., 1.5 BTC)')
     open_parser.add_argument('--price', type=float, help='Limit price for exchange1')
     open_parser.add_argument('--poll-interval', type=float, default=2.0, help='Poll interval in seconds (default: 2)')
     open_parser.add_argument('--timeout', type=int, default=300, help='Timeout in seconds (default: 300)')
@@ -467,7 +479,7 @@ def main():
     close_parser.add_argument('--exchange2', required=True, help='Second exchange (market order)')
     close_parser.add_argument('--side2', required=True, help='Side for exchange2 (close_long/close_short)')
     close_parser.add_argument('--symbol', required=True, help='Trading symbol (normalized, e.g., BTC)')
-    close_parser.add_argument('--size', type=float, required=True, help='Order size in USDT')
+    close_parser.add_argument('--size', type=float, required=True, help='Order size in symbol units (e.g., 1.5 BTC)')
     close_parser.add_argument('--price', type=float, help='Limit price for exchange1')
     close_parser.add_argument('--poll-interval', type=float, default=2.0, help='Poll interval in seconds (default: 2)')
     close_parser.add_argument('--timeout', type=int, default=300, help='Timeout in seconds (default: 300)')

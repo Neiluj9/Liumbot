@@ -216,10 +216,6 @@ class AsterOrderMonitor:
             reduce_only = order.get("R", False)
             order_type_str = order.get("o", "LIMIT")  # Order Type
 
-            # Debug: Print raw Aster data
-            print(f"[DEBUG] Raw Aster order data: status={aster_status}, side={aster_side}, "
-                  f"reduceOnly={reduce_only}, type={order_type_str}, z={order.get('z')}, q={order.get('q')}")
-
             # Map to our enums
             status = self.STATUS_MAPPING.get(aster_status, OrderStatus.PENDING)
 
@@ -281,8 +277,6 @@ class AsterOrderMonitor:
                 msg = json.loads(raw)
 
                 # Print full raw message for debugging
-                print(f"[DEBUG] Full WebSocket message: {json.dumps(msg, indent=2)}")
-
                 # Parse order updates
                 order_result = self._parse_order_update(msg)
                 if order_result and self.callback:

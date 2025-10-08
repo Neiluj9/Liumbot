@@ -2,6 +2,7 @@
 
 import time
 import hashlib
+import hmac
 import json
 try:
     from curl_cffi import requests
@@ -105,6 +106,43 @@ class MEXCExecutor(BaseExecutor):
             "Authorization": self.cookie_key,
         }
 
+    def _generate_api_signature(self, timestamp: str, params: str = "") -> str:
+        """Generate HMAC SHA256 signature for MEXC API authentication.
+
+        Args:
+            timestamp: Request timestamp in milliseconds
+            params: Query parameters string (for GET) or empty (for GET without params)
+
+        Returns:
+            Hex-encoded HMAC SHA256 signature
+        """
+        # Signature string: api_key + timestamp + params
+        sign_str = self.api_key + timestamp + params
+        signature = hmac.new(
+            self.api_secret.encode('utf-8'),
+            sign_str.encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+        return signature
+
+    def _get_api_headers(self, params: str = "") -> dict:
+        """Get headers with API key authentication for MEXC official API.
+
+        Args:
+            params: Query parameters string (sorted alphabetically for GET)
+
+        Returns:
+            Headers dict with API authentication
+        """
+        timestamp = str(int(time.time() * 1000))
+        signature = self._generate_api_signature(timestamp, params)
+        return {
+            "Content-Type": "application/json",
+            "ApiKey": self.api_key,
+            "Request-Time": timestamp,
+            "Signature": signature,
+        }
+
     def place_order(
         self,
         symbol: str,
@@ -202,7 +240,6 @@ class MEXCExecutor(BaseExecutor):
 
     def cancel_order(self, order_id: str, symbol: str) -> bool:
         """Cancel order on MEXC.
-
         Args:
             order_id: Order ID
             symbol: Normalized symbol (not used by MEXC cancel endpoint)
@@ -230,31 +267,87 @@ class MEXCExecutor(BaseExecutor):
         return data.get('success', False)
 
     def get_order_status(self, order_id: str, symbol: str) -> OrderResult:
-        """Get order status from MEXC.
-
-        NOTE: MEXC's REST API for order status is not reliable.
-        Use MEXCOrderMonitor for real-time order tracking instead.
+        """Get order status from MEXC using official API.
 
         Args:
-            order_id: Order ID
-            symbol: Normalized symbol
+            order_id: Order ID (e.g., '730992108428455552')
+            symbol: Normalized symbol (e.g., 'BTC')
 
         Returns:
             OrderResult with current status
 
         Raises:
-            NotImplementedError: Always (use WebSocket monitoring instead)
+            ValueError: If API credentials are not configured
+            Exception: If API request fails
 
-        Example:
-            >>> from executors.mexc_order_monitor import MEXCOrderMonitor
-            >>> monitor = MEXCOrderMonitor(api_key="...", api_secret="...")
-            >>> def on_order(order: OrderResult):
-            >>>     if order.status == OrderStatus.FILLED:
-            >>>         print(f"Order {order.order_id} filled!")
-            >>> monitor.set_callback(on_order)
-            >>> await monitor.connect()
+        MEXC Order States:
+            1: Uninformed
+            2: Uncompleted (partially filled)
+            3: Completed (fully filled)
+            4: Cancelled
+            5: Invalid
         """
-        raise NotImplementedError(
-            "MEXC order status via REST is not reliable. "
-            "Use MEXCOrderMonitor separately for real-time tracking."
+        if not self.api_key or not self.api_secret:
+            raise ValueError(
+                "API key and secret are required for get_order_status. "
+                "Provide 'api_key' and 'api_secret' in config."
+            )
+
+        # Official MEXC API endpoint
+        url = f"https://contract.mexc.com/api/v1/private/order/get/{order_id}"
+
+        # GET request with no query params, so params string is empty
+        headers = self._get_api_headers(params="")
+
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=30,
+            impersonate="chrome110"
+        )
+
+        if response.status_code != 200:
+            raise Exception(f"HTTP {response.status_code}: {response.text}")
+
+        data = response.json()
+
+        if not data.get('success'):
+            error_msg = data.get('msg') or data.get('message', 'Unknown error')
+            raise Exception(f"MEXC API error (code {data.get('code')}): {error_msg}")
+
+        # Parse order data
+        order_data = data.get('data', {})
+
+        # Map MEXC state to OrderStatus
+        state = order_data.get('state')
+        status_map = {
+            1: OrderStatus.PENDING,      # Uninformed
+            2: OrderStatus.PARTIAL,      # Uncompleted
+            3: OrderStatus.FILLED,       # Completed
+            4: OrderStatus.CANCELLED,    # Cancelled
+            5: OrderStatus.REJECTED,     # Invalid
+        }
+        status = status_map.get(state, OrderStatus.PENDING)
+
+        # Reverse map MEXC side to OrderSide
+        mexc_side = order_data.get('side')
+        side_reverse_map = {v: k for k, v in self.SIDE_MAPPING.items()}
+        side = side_reverse_map.get(mexc_side, OrderSide.LONG)
+
+        # Map order type
+        order_type_code = order_data.get('type')
+        order_type = OrderType.LIMIT if order_type_code == 1 else OrderType.MARKET
+
+        return OrderResult(
+            order_id=str(order_data.get('orderId')),
+            exchange='mexc',
+            symbol=symbol,
+            side=side,
+            order_type=order_type,
+            size=float(order_data.get('vol', 0)),
+            price=float(order_data.get('price', 0)) if order_data.get('price') else None,
+            filled_quantity=float(order_data.get('dealVol', 0)),
+            average_price=float(order_data.get('dealAvgPrice', 0)) if order_data.get('dealAvgPrice') else None,
+            status=status,
+            raw_response=data
         )
