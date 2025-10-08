@@ -31,6 +31,7 @@ EXCHANGES = {
 # Load symbols data from JSON file
 _SYMBOLS_DATA = None
 
+
 def _load_symbols_data():
     """Load symbols data from JSON file"""
     global _SYMBOLS_DATA
@@ -51,14 +52,17 @@ def _load_symbols_data():
             }
     return _SYMBOLS_DATA
 
+
 # Symbols to track (loaded from JSON)
 def get_symbols():
     """Get list of symbols to track"""
     data = _load_symbols_data()
     return data.get("symbols", [])
 
+
 # Backward compatibility
 SYMBOLS = get_symbols()
+
 
 def get_funding_interval(exchange: str, symbol: str) -> int:
     """Get funding interval for a specific exchange and symbol
@@ -80,6 +84,7 @@ def get_funding_interval(exchange: str, symbol: str) -> int:
 
     # Return exchange default
     return exchange_data.get("funding_interval", EXCHANGES.get(exchange, {}).get("funding_interval_hours", 8))
+
 
 def get_fees(exchange: str, symbol: str) -> Tuple[Optional[float], Optional[float]]:
     """Get maker and taker fees for a specific exchange and symbol
@@ -104,6 +109,7 @@ def get_fees(exchange: str, symbol: str) -> Tuple[Optional[float], Optional[floa
     taker_fee = exchange_data.get("taker_fee")
     return (maker_fee, taker_fee)
 
+
 # Trading configuration
 # IMPORTANT: Fill in your actual credentials before using trade.py
 TRADING_CONFIG = {
@@ -113,9 +119,16 @@ TRADING_CONFIG = {
         "private_key": "YOUR_HYPERLIQUID_PRIVATE_KEY_HERE",
     },
     "mexc": {
-        # Get session cookie from browser after logging into MEXC
-        # Copy the entire cookie string from browser dev tools
-        "session_cookie": "WEB75e76c307937b536bbd96b67ddde36b38d190308a3bd82b8ea8ff982c89b8c35",
+        # Get cookie key from browser after logging into MEXC Futures
+        # This is the authorization key used for signing requests
+        # Find it in browser dev tools: Network tab -> any futures API request -> Request Headers -> Authorization
+        "cookie_key": "WEB75e76c307937b536bbd96b67ddde36b38d190308a3bd82b8ea8ff982c89b8c35",
+
+        # Optional: API credentials for WebSocket order monitoring
+        # Get these from MEXC website > Account > API Management
+        # Required for real-time order status tracking
+        "api_key": "mx0vglfPbPCA0hVQiG",
+        "api_secret": "82f06e5c2c9342db977bf3a962b5b2f7",
     },
     "aster": {
         # Aster Pro mode with ERC20 wallet

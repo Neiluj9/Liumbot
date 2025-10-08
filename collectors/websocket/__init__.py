@@ -2,7 +2,7 @@
 
 from .base import WebSocketCollector, OrderbookData, SymbolMetadata
 from .hyperliquid_ws import HyperliquidWebSocket
-from .mexc_ws import MEXCWebSocket
+from .mexc_spot_ws import MEXCWebSocket
 from .mexc_futures_ws import MEXCFuturesWebSocket
 from .aster_ws import AsterWebSocket
 

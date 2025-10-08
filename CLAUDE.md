@@ -43,7 +43,7 @@ liumbot2/
 │   └── websocket/         # WebSocket collectors
 │       ├── base.py
 │       ├── hyperliquid_ws.py
-│       ├── mexc_ws.py
+│       ├── mexc_spot_ws.py
 │       ├── mexc_futures_ws.py
 │       └── aster_ws.py
 ├── executors/             # Trading execution
