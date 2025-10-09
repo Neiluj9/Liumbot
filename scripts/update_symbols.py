@@ -209,8 +209,8 @@ async def main():
             },
             "aster": {
                 "funding_interval": 8,  # Default
-                "maker_fee": 0.00010,
-                "taker_fee": 0.00035,
+                "maker_fee": 0.00005,  # 0.005% (from https://docs.asterdex.com/product/aster-perpetual-pro/fees-and-specs/fees)
+                "taker_fee": 0.00040,  # 0.04%
                 "symbols": {
                     symbol: {"funding_interval": interval}
                     for symbol, interval in aster_intervals.items()

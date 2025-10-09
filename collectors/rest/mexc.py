@@ -22,17 +22,17 @@ class MEXCCollector(BaseCollector):
 
     async def get_funding_rates(self, symbols: List[str]) -> List[FundingRate]:
         """Get current funding rates for symbols"""
-        # Fetch all funding rates and contract details
+        # Fetch all funding rates and ticker data (for volume)
         funding_url = f"{self.api_base}/funding_rate"
-        detail_url = f"{self.api_base}/detail"
+        ticker_url = f"{self.api_base}/ticker"
 
         try:
             async with aiohttp.ClientSession() as session:
-                # Fetch funding rates and contract details concurrently
+                # Fetch funding rates and ticker data concurrently
                 funding_task = session.get(funding_url, timeout=aiohttp.ClientTimeout(total=10))
-                detail_task = session.get(detail_url, timeout=aiohttp.ClientTimeout(total=10))
+                ticker_task = session.get(ticker_url, timeout=aiohttp.ClientTimeout(total=10))
 
-                funding_response, detail_response = await asyncio.gather(funding_task, detail_task, return_exceptions=True)
+                funding_response, ticker_response = await asyncio.gather(funding_task, ticker_task, return_exceptions=True)
 
                 # Process funding rates
                 if isinstance(funding_response, Exception):
@@ -55,6 +55,21 @@ class MEXCCollector(BaseCollector):
                             normalized = symbol.replace("_USDT", "")
                             all_rates[normalized] = item
 
+                # Get volume data from ticker response
+                volumes = {}
+                if not isinstance(ticker_response, Exception):
+                    async with ticker_response:
+                        ticker_data = await ticker_response.json()
+                        if ticker_data.get("success") and ticker_data.get("data"):
+                            for item in ticker_data["data"]:
+                                symbol = item.get("symbol", "")
+                                if symbol.endswith("_USDT"):
+                                    normalized = symbol.replace("_USDT", "")
+                                    # amount24 is the 24h volume in USDT (quote currency)
+                                    volume_24h = float(item.get("amount24", 0))
+                                    if volume_24h > 0:
+                                        volumes[normalized] = volume_24h
+
                 # Combine funding rates with fee information from config
                 funding_rates = []
                 for symbol in symbols:
@@ -74,7 +89,8 @@ class MEXCCollector(BaseCollector):
                                 rate_data["nextSettleTime"] / 1000
                             ) if rate_data.get("nextSettleTime") else None,
                             maker_fee=maker_fee,
-                            taker_fee=taker_fee
+                            taker_fee=taker_fee,
+                            volume_24h=volumes.get(symbol)
                         ))
 
                 return funding_rates

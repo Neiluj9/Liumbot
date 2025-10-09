@@ -1,6 +1,7 @@
 """Hyperliquid exchange collector"""
 
 import aiohttp
+import asyncio
 from datetime import datetime
 from typing import List
 from collectors.rest.base import BaseCollector
@@ -21,14 +22,45 @@ class HyperliquidCollector(BaseCollector):
 
         async with aiohttp.ClientSession() as session:
             try:
-                # Get predicted fundings
-                payload = {"type": "predictedFundings"}
-                async with session.post(
+                # Get predicted fundings and metadata (for volumes) concurrently
+                funding_payload = {"type": "predictedFundings"}
+                meta_payload = {"type": "metaAndAssetCtxs"}
+
+                funding_task = session.post(
                     self.api_url,
-                    json=payload,
+                    json=funding_payload,
                     headers={"Content-Type": "application/json"}
-                ) as response:
-                    data = await response.json()
+                )
+                meta_task = session.post(
+                    self.api_url,
+                    json=meta_payload,
+                    headers={"Content-Type": "application/json"}
+                )
+
+                funding_response, meta_response = await asyncio.gather(funding_task, meta_task, return_exceptions=True)
+
+                # Get volume data from meta response
+                volumes = {}
+                if not isinstance(meta_response, Exception):
+                    async with meta_response:
+                        meta_data = await meta_response.json()
+                        # Extract 24h volume from assetCtxs
+                        if isinstance(meta_data, list) and len(meta_data) >= 2:
+                            asset_ctxs = meta_data[1]  # Second element contains asset contexts
+                            for asset in asset_ctxs:
+                                if isinstance(asset, dict):
+                                    coin = asset.get("coin", "")
+                                    # Volume is in USD
+                                    volume_24h = float(asset.get("dayNtlVlm", 0))
+                                    if volume_24h > 0:
+                                        volumes[coin] = volume_24h
+
+                # Process funding rates
+                if isinstance(funding_response, Exception):
+                    raise funding_response
+
+                async with funding_response:
+                    data = await funding_response.json()
 
                     # Data format: [[coin, [[exchange, {data}], ...]], ...]
                     if not isinstance(data, list):
@@ -67,7 +99,8 @@ class HyperliquidCollector(BaseCollector):
                                                 exchange_data["nextFundingTime"] / 1000
                                             ) if exchange_data.get("nextFundingTime") else None,
                                             maker_fee=maker_fee,
-                                            taker_fee=taker_fee
+                                            taker_fee=taker_fee,
+                                            volume_24h=volumes.get(symbol)
                                         ))
                                         break
                                 break

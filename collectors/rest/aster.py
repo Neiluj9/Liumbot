@@ -1,6 +1,7 @@
 """Aster exchange collector"""
 
 import aiohttp
+import asyncio
 from datetime import datetime
 from typing import List
 from collectors.rest.base import BaseCollector
@@ -28,12 +29,43 @@ class AsterCollector(BaseCollector):
         funding_rates = []
 
         async with aiohttp.ClientSession() as session:
-            # Get all premium index data (includes funding rates)
-            url = f"{self.api_base}/fapi/v1/premiumIndex"
+            # Get all premium index data (includes funding rates) and 24h ticker data (includes volumes)
+            premium_url = f"{self.api_base}/fapi/v1/premiumIndex"
+            ticker_url = f"{self.api_base}/fapi/v1/ticker/24hr"
 
             try:
-                async with session.get(url) as response:
-                    data = await response.json()
+                # Fetch both endpoints concurrently
+                premium_task = session.get(premium_url)
+                ticker_task = session.get(ticker_url)
+
+                premium_response, ticker_response = await asyncio.gather(premium_task, ticker_task, return_exceptions=True)
+
+                # Get volume data from ticker response
+                volumes = {}
+                if not isinstance(ticker_response, Exception):
+                    async with ticker_response:
+                        ticker_data = await ticker_response.json()
+                        # Convert single object to list for uniform processing
+                        if isinstance(ticker_data, dict):
+                            ticker_data = [ticker_data]
+
+                        for item in ticker_data:
+                            aster_symbol = item.get("symbol", "")
+                            # Match with our symbols
+                            for symbol in symbols:
+                                if aster_symbol == self._normalize_aster_symbol(symbol):
+                                    # Volume is in quote currency (USDT)
+                                    volume_24h = float(item.get("quoteVolume", 0))
+                                    if volume_24h > 0:
+                                        volumes[symbol] = volume_24h
+                                    break
+
+                # Process premium index data
+                if isinstance(premium_response, Exception):
+                    raise premium_response
+
+                async with premium_response:
+                    data = await premium_response.json()
 
                     # Convert single object to list for uniform processing
                     if isinstance(data, dict):
@@ -59,7 +91,8 @@ class AsterCollector(BaseCollector):
                                         item["nextFundingTime"] / 1000
                                     ) if item.get("nextFundingTime") else None,
                                     maker_fee=maker_fee,
-                                    taker_fee=taker_fee
+                                    taker_fee=taker_fee,
+                                    volume_24h=volumes.get(symbol)
                                 ))
                                 break
 

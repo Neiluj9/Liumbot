@@ -183,8 +183,14 @@ class AsterExecutor(BaseExecutor):
         if reduce_only:
             payload['reduceOnly'] = True
 
+        # Debug: print payload before sending
+        print(f"[DEBUG] Aster payload: {payload}")
+
         try:
             data = self._signed_request('POST', '/fapi/v3/order', payload)
+
+            # Debug: print response
+            print(f"[DEBUG] Aster response: {data}")
 
             # Parse Aster response
             order_id = str(data.get('orderId'))

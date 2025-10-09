@@ -42,7 +42,7 @@ class SpreadMonitor:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         csv_dir = "exports/spreads/csv"
         os.makedirs(csv_dir, exist_ok=True)
-        self.csv_filename = os.path.join(csv_dir, f"spreads_log_{timestamp}.csv")
+        self.csv_filename = os.path.join(csv_dir, f"spreads_log_{self.symbol}_{timestamp}.csv")
         self._init_csv()
 
         # WebSocket collectors

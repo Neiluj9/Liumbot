@@ -1,7 +1,7 @@
 """Plot spread data from CSV log file
 
 Usage:
-    python plot_spread.py spreads_log_20251006_215224.csv
+    python plot_spread.py spreads_log_BTC_20251006_215224.csv
 """
 
 import sys
@@ -150,7 +150,7 @@ def plot_spread(csv_filename):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python plot_spread.py <csv_file>")
-        print("Example: python plot_spread.py spreads_log_20251006_215224.csv")
+        print("Example: python plot_spread.py spreads_log_BTC_20251006_215224.csv")
         sys.exit(1)
 
     csv_file = sys.argv[1]

@@ -35,6 +35,7 @@ class FundingRate:
     premium: Optional[float] = None
     maker_fee: Optional[float] = None  # Maker fee rate (e.g., 0.0002 = 0.02%)
     taker_fee: Optional[float] = None  # Taker fee rate (e.g., 0.0006 = 0.06%)
+    volume_24h: Optional[float] = None  # 24-hour trading volume in USD
 
     def __post_init__(self):
         """Validate data after initialization"""
@@ -56,7 +57,8 @@ class FundingRate:
             "funding_rate": self.funding_rate,
             "timestamp": self.timestamp.isoformat(),
             "next_funding_time": self.next_funding_time.isoformat() if self.next_funding_time else None,
-            "premium": self.premium
+            "premium": self.premium,
+            "volume_24h": self.volume_24h
         }
 
 
@@ -80,6 +82,8 @@ class ArbitrageOpportunity:
     short_taker_fee: Optional[float] = None  # Taker fee for short exchange
     long_next_funding_time: Optional[datetime] = None  # Next funding time for long position
     short_next_funding_time: Optional[datetime] = None  # Next funding time for short position
+    long_volume_24h: Optional[float] = None  # 24h volume in USD for long exchange
+    short_volume_24h: Optional[float] = None  # 24h volume in USD for short exchange
 
     @property
     def daily_return(self) -> float:
@@ -101,12 +105,14 @@ class ArbitrageOpportunity:
             "long_funding_interval_hours": self.long_interval,
             "long_maker_fee": self.long_maker_fee,
             "long_taker_fee": self.long_taker_fee,
+            "long_volume_24h": self.long_volume_24h,
             "short_exchange": self.short_exchange,
             "short_rate_hourly": self.short_rate,
             "short_rate_interval": self.short_rate_interval,
             "short_funding_interval_hours": self.short_interval,
             "short_maker_fee": self.short_maker_fee,
             "short_taker_fee": self.short_taker_fee,
+            "short_volume_24h": self.short_volume_24h,
             "rate_difference": self.rate_difference,
             "annual_return_estimate": f"{self.annual_return:.2%}",
             "timestamp": self.timestamp.isoformat()

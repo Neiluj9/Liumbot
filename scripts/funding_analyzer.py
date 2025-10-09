@@ -96,7 +96,8 @@ async def main():
                 "funding_rate": rate.funding_rate,
                 "funding_rate_percent": f"{rate.funding_rate*100:.4f}%",
                 "timestamp": rate.timestamp.isoformat(),
-                "next_funding_time": rate.next_funding_time.isoformat() if rate.next_funding_time else None
+                "next_funding_time": rate.next_funding_time.isoformat() if rate.next_funding_time else None,
+                "volume_24h": rate.volume_24h
             }
             for rate in sorted(funding_rates, key=lambda x: (x.symbol, x.exchange))
         ]
@@ -118,9 +119,39 @@ async def main():
         print(f"{Fore.WHITE}Top {Fore.CYAN}5{Fore.WHITE} opportunities (of {Fore.CYAN}{len(opportunities)}{Fore.WHITE} total)")
         print(f"{Fore.YELLOW}Note: Rates as received for each exchange's funding interval\n")
 
+        # Helper function to format volume
+        def format_volume(volume):
+            """Format volume in a human-readable way"""
+            if volume is None:
+                return "N/A"
+            if volume >= 1_000_000_000:
+                return f"${volume/1_000_000_000:.2f}B"
+            elif volume >= 1_000_000:
+                return f"${volume/1_000_000:.2f}M"
+            elif volume >= 1_000:
+                return f"${volume/1_000:.2f}K"
+            else:
+                return f"${volume:.2f}"
+
+        # Helper function to get volume color
+        def get_volume_color(volume):
+            """Get color based on volume level (liquidity)"""
+            if volume is None:
+                return Fore.WHITE
+            elif volume >= 1_000_000_000:  # >= $1B: Very high liquidity
+                return Fore.GREEN
+            elif volume >= 500_000_000:    # >= $500M: High liquidity
+                return Fore.CYAN
+            elif volume >= 100_000_000:    # >= $100M: Good liquidity
+                return Fore.YELLOW
+            elif volume >= 10_000_000:     # >= $10M: Moderate liquidity
+                return Fore.MAGENTA
+            else:                           # < $10M: Low liquidity
+                return Fore.RED
+
         # Table header
-        print(f"{Fore.CYAN}{Style.BRIGHT}{'#':<3} {'Symbol':<9} {'Exch':<13} {'Maker':<9} {'Taker':<9} {'Int':<5} {'Rate':<11} {'Next Funding':<13} {'Spread/h':<11} {'Annual':<9}")
-        print(f"{Fore.CYAN}{'-' * 98}")
+        print(f"{Fore.CYAN}{Style.BRIGHT}{'#':<3} {'Symbol':<9} {'Exch':<13} {'Maker':<9} {'Taker':<9} {'Vol 24h':<12} {'Int':<5} {'Rate':<11} {'Next Funding':<13} {'Spread/h':<11} {'Annual':<9}")
+        print(f"{Fore.CYAN}{'-' * 117}")
 
         # Table rows - showing rates as received for each interval with fees
         for idx, opp in enumerate(top_opportunities, 1):
@@ -137,6 +168,12 @@ async def main():
             short_maker = f"{opp.short_maker_fee*100:.3f}%" if opp.short_maker_fee is not None else "N/A"
             short_taker = f"{opp.short_taker_fee*100:.3f}%" if opp.short_taker_fee is not None else "N/A"
 
+            # Format volumes with colors
+            long_volume = format_volume(opp.long_volume_24h)
+            short_volume = format_volume(opp.short_volume_24h)
+            long_volume_color = get_volume_color(opp.long_volume_24h)
+            short_volume_color = get_volume_color(opp.short_volume_24h)
+
             # Format countdowns
             long_countdown = format_time_until_funding(opp.long_next_funding_time)
             short_countdown = format_time_until_funding(opp.short_next_funding_time)
@@ -148,11 +185,14 @@ async def main():
             annual_color = Fore.GREEN if opp.annual_return > 0.05 else Fore.YELLOW
 
             # First line: Long position
-            print(f"{Fore.WHITE}{idx:<3} {Fore.YELLOW}{opp.symbol:<9} {Fore.GREEN}L:{opp.long_exchange:<11} {Fore.WHITE}{long_maker:<9} {long_taker:<9} {long_interval:<5} {long_rate_pct:<11} {long_countdown_color}{long_countdown:<13} {spread_color}{spread_pct:<11} {annual_color}{annual_return:<9}")
+            print(f"{Fore.WHITE}{idx:<3} {Fore.YELLOW}{opp.symbol:<9} {Fore.GREEN}L:{opp.long_exchange:<11} {Fore.WHITE}{long_maker:<9} {long_taker:<9} {long_volume_color}{long_volume:<12} {Fore.WHITE}{long_interval:<5} {long_rate_pct:<11} {long_countdown_color}{long_countdown:<13} {spread_color}{spread_pct:<11} {annual_color}{annual_return:<9}")
             # Second line: Short position
-            print(f"{Fore.WHITE}{'':3} {'':9} {Fore.RED}S:{opp.short_exchange:<11} {Fore.WHITE}{short_maker:<9} {short_taker:<9} {short_interval:<5} {short_rate_pct:<11} {short_countdown_color}{short_countdown:<13}")
+            print(f"{Fore.WHITE}{'':3} {'':9} {Fore.RED}S:{opp.short_exchange:<11} {Fore.WHITE}{short_maker:<9} {short_taker:<9} {short_volume_color}{short_volume:<12} {Fore.WHITE}{short_interval:<5} {short_rate_pct:<11} {short_countdown_color}{short_countdown:<13}")
+            # Separator line between symbols
+            if idx < len(top_opportunities):
+                print(f"{Fore.CYAN}{'·' * 117}")
 
-        print(f"{Fore.CYAN}{'=' * 98}")
+        print(f"{Fore.CYAN}{'=' * 117}")
         print()
 
         # Save to JSON

@@ -170,11 +170,17 @@ async def monitor_order_websocket(exchange_name: str, order_id: str, symbol: str
 
     # Connect and wait with timeout
     connect_task = asyncio.create_task(monitor.connect())
-    timeout_task = asyncio.create_task(asyncio.sleep(args.timeout))
     complete_task = asyncio.create_task(is_complete.wait())
 
+    tasks = [connect_task, complete_task]
+
+    # Only add timeout if specified
+    if args.timeout is not None:
+        timeout_task = asyncio.create_task(asyncio.sleep(args.timeout))
+        tasks.append(timeout_task)
+
     done, pending = await asyncio.wait(
-        [connect_task, timeout_task, complete_task],
+        tasks,
         return_when=asyncio.FIRST_COMPLETED
     )
 
@@ -182,8 +188,8 @@ async def monitor_order_websocket(exchange_name: str, order_id: str, symbol: str
     for task in pending:
         task.cancel()
 
-    # Check if timeout
-    if timeout_task in done:
+    # Check if timeout (only if timeout was set)
+    if args.timeout is not None and 'timeout_task' in locals() and timeout_task in done:
         print(f"{Fore.RED}✗ Timeout reached ({args.timeout}s)")
         if last_filled_qty > 0:
             print(f"{Fore.YELLOW}⚠ Partial position opened: {last_filled_qty}/{args.size}")
@@ -277,7 +283,7 @@ def open_position_sync(args):
         elapsed = 0
         last_filled_qty = 0.0
 
-        while elapsed < timeout:
+        while timeout is None or elapsed < timeout:
             time.sleep(poll_interval)
             elapsed += poll_interval
 
@@ -326,12 +332,14 @@ def open_position_sync(args):
                 print(f"{Fore.RED}✗ Order was cancelled")
                 break
 
-            print(f"{Fore.CYAN}Polling... ({elapsed}s/{timeout}s, Filled: {filled_qty:.4f}/{status.size})")
+            timeout_str = f"{timeout}s" if timeout is not None else "∞"
+            print(f"{Fore.CYAN}Polling... ({elapsed}s/{timeout_str}, Filled: {filled_qty:.4f}/{status.size})")
 
         else:
-            print(f"{Fore.RED}✗ Timeout reached ({timeout}s)")
-            if last_filled_qty > 0:
-                print(f"{Fore.YELLOW}⚠ Partial position opened: {last_filled_qty}/{args.size}")
+            if timeout is not None:
+                print(f"{Fore.RED}✗ Timeout reached ({timeout}s)")
+                if last_filled_qty > 0:
+                    print(f"{Fore.YELLOW}⚠ Partial position opened: {last_filled_qty}/{args.size}")
 
     except KeyboardInterrupt:
         print(f"\n{Fore.YELLOW}⚠ Interrupted by user")
@@ -470,7 +478,7 @@ def main():
     open_parser.add_argument('--size', type=float, required=True, help='Order size in symbol units (e.g., 1.5 BTC)')
     open_parser.add_argument('--price', type=float, help='Limit price for exchange1')
     open_parser.add_argument('--poll-interval', type=float, default=2.0, help='Poll interval in seconds (default: 2)')
-    open_parser.add_argument('--timeout', type=int, default=300, help='Timeout in seconds (default: 300)')
+    open_parser.add_argument('--timeout', type=int, default=None, help='Timeout in seconds (default: None - no timeout)')
 
     # Close command
     close_parser = subparsers.add_parser('close', help='Close position')
@@ -482,7 +490,7 @@ def main():
     close_parser.add_argument('--size', type=float, required=True, help='Order size in symbol units (e.g., 1.5 BTC)')
     close_parser.add_argument('--price', type=float, help='Limit price for exchange1')
     close_parser.add_argument('--poll-interval', type=float, default=2.0, help='Poll interval in seconds (default: 2)')
-    close_parser.add_argument('--timeout', type=int, default=300, help='Timeout in seconds (default: 300)')
+    close_parser.add_argument('--timeout', type=int, default=None, help='Timeout in seconds (default: None - no timeout)')
 
     # Cancel command
     cancel_parser = subparsers.add_parser('cancel', help='Cancel order')
