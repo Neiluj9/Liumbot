@@ -172,6 +172,12 @@ class AsterOrderMonitor:
         try:
             self._signed_request('DELETE', '/fapi/v3/listenKey', {})
             return True
+        except requests.exceptions.HTTPError as e:
+            # 400 Bad Request is expected if listenKey is already expired/invalid
+            if e.response.status_code == 400:
+                return True  # Already closed/expired, treat as success
+            print(f"[Aster-Monitor] Failed to close listenKey: {e}")
+            return False
         except Exception as e:
             print(f"[Aster-Monitor] Failed to close listenKey: {e}")
             return False
@@ -272,15 +278,20 @@ class AsterOrderMonitor:
             )
 
             # Process messages
-            while True:
-                raw = await self.ws.recv()
-                msg = json.loads(raw)
+            try:
+                while True:
+                    raw = await self.ws.recv()
+                    msg = json.loads(raw)
 
-                # Print full raw message for debugging
-                # Parse order updates
-                order_result = self._parse_order_update(msg)
-                if order_result and self.callback:
-                    self.callback(order_result)
+                    # Print full raw message for debugging
+                    # Parse order updates
+                    order_result = self._parse_order_update(msg)
+                    if order_result and self.callback:
+                        self.callback(order_result)
+
+            except websockets.exceptions.ConnectionClosed:
+                # WebSocket closed normally or abnormally - this is expected during shutdown
+                pass
 
         finally:
             if self._keepalive_task:
@@ -288,3 +299,19 @@ class AsterOrderMonitor:
             if self.ws:
                 await self.ws.close()
             self._close_listen_key()
+
+    async def disconnect(self):
+        """Disconnect from WebSocket and cleanup resources"""
+        if self._keepalive_task:
+            self._keepalive_task.cancel()
+            try:
+                await self._keepalive_task
+            except asyncio.CancelledError:
+                pass
+
+        if self.ws:
+            await self.ws.close()
+            self.ws = None
+
+        self._close_listen_key()
+        self.listen_key = None

@@ -15,41 +15,6 @@ Usage:
 
     # Cancel order
     python trade_cli.py cancel --exchange hyperliquid --order-id 123456 --symbol BTC
-
-    # Open position with DYNAMIC pricing (tracks exchange2 orderbook)
-    # SHORT on exchange1 → uses BID of exchange2 as reference
-    python trade_cli.py open --exchange1 hyperliquid --side1 short \
-                              --exchange2 mexc --side2 long \
-                              --symbol BTC --size 0.1 \
-                              --dynamic-mode \
-                              --price-offset-pct -0.5 \
-                              --price-tolerance-pct 0.3
-    # Note: price-tolerance-pct 0.3 means 0.3% (not 0.003%)
-
-    # LONG on exchange1 → uses ASK of exchange2 as reference
-    python trade_cli.py open --exchange1 aster --side1 long \
-                              --exchange2 hyperliquid --side2 short \
-                              --symbol ETH --size 1.0 \
-                              --dynamic-mode \
-                              --price-offset-pct 0.5 \
-                              --price-tolerance-pct 0.2
-
-
-Dynamic Mode:
-    The dynamic mode tracks the orderbook of exchange2 in real-time via WebSocket
-    and automatically adjusts the limit price on exchange1 based on:
-
-    - Reference price selection:
-      * SHORT on exchange1 → BID price of exchange2
-      * LONG on exchange1  → ASK price of exchange2
-
-    - Target price = reference_price * (1 + price_offset_pct / 100)
-
-    - Order renewal: If the reference price moves by more than price_tolerance_pct,
-      the order on exchange1 is cancelled and replaced with a new order at the
-      updated price.
-
-    - Partial fills are automatically hedged on exchange2 as they occur.
 """
 
 import argparse
@@ -67,8 +32,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import TRADING_CONFIG
 from executors import HyperliquidExecutor, MEXCExecutor, AsterExecutor
 from executors.base import OrderSide, OrderType, OrderStatus
-from collectors.websocket import HyperliquidWebSocket, MEXCFuturesWebSocket, AsterWebSocket, OrderbookData
-from utils.price_tracker import DynamicPriceTracker, PriceUpdate
 
 # Initialize colorama
 init(autoreset=True)
@@ -97,27 +60,6 @@ def get_executor(exchange_name: str):
         return AsterExecutor(config)
     else:
         raise ValueError(f"Unsupported exchange: {exchange_name}")
-
-
-def get_websocket_collector(exchange_name: str):
-    """Get WebSocket collector instance for exchange.
-
-    Args:
-        exchange_name: Exchange name (hyperliquid, mexc, aster)
-
-    Returns:
-        WebSocket collector instance
-    """
-    exchange_name = exchange_name.lower()
-
-    if exchange_name == 'hyperliquid':
-        return HyperliquidWebSocket()
-    elif exchange_name == 'mexc':
-        return MEXCFuturesWebSocket()
-    elif exchange_name == 'aster':
-        return AsterWebSocket()
-    else:
-        raise ValueError(f"WebSocket not supported for exchange: {exchange_name}")
 
 
 def parse_side(side_str: str) -> OrderSide:
@@ -462,320 +404,8 @@ async def open_position_async(args):
         sys.exit(1)
 
 
-async def open_position_dynamic(args):
-    """Open position with dynamic pricing based on exchange2 orderbook.
-
-    Args:
-        args: Command line arguments with dynamic mode parameters
-    """
-    print_position_header(args)
-    print(f"{Fore.CYAN}Dynamic pricing mode enabled")
-    print(f"  Price offset: {args.price_offset_pct:+.2f}%")
-    print(f"  Price tolerance: ±{args.price_tolerance_pct:.2f}%")
-    print()
-
-    # Get executors
-    executor1 = get_executor(args.exchange1)
-    executor2 = get_executor(args.exchange2)
-
-    side1 = parse_side(args.side1)
-    side2 = parse_side(args.side2)
-
-    # Get WebSocket collector for exchange2
-    ws_collector = get_websocket_collector(args.exchange2)
-
-    # Get symbol metadata for exchange1 (for price rounding)
-    ws_collector_ex1 = get_websocket_collector(args.exchange1)
-    symbol_metadata = await ws_collector_ex1.get_metadata(args.symbol)
-    if symbol_metadata:
-        price_precision = symbol_metadata.price_precision
-        print(f"{Fore.CYAN}Price precision for {args.symbol} on {args.exchange1}: {price_precision} decimals")
-    else:
-        price_precision = 2  # Default fallback
-        print(f"{Fore.YELLOW}⚠ Could not fetch price precision, using default: {price_precision} decimals")
-    print()
-
-    # State tracking
-    current_order1 = None
-    total_filled_qty = 0.0
-    is_complete = asyncio.Event()
-    price_tracker = DynamicPriceTracker(
-        exchange1_side=side1,
-        price_offset_pct=args.price_offset_pct,
-        price_tolerance_pct=args.price_tolerance_pct
-    )
-
-    # Order monitoring setup based on exchange1
-    order_monitor = None
-    if args.exchange1.lower() in ['aster', 'mexc']:
-        if args.exchange1.lower() == 'aster':
-            from executors.aster_order_monitor import AsterOrderMonitor
-            config = TRADING_CONFIG['aster']
-            order_monitor = AsterOrderMonitor(
-                wallet_address=config['wallet_address'],
-                signer_address=config['signer_address'],
-                private_key=config['private_key']
-            )
-        elif args.exchange1.lower() == 'mexc':
-            from executors.mexc_order_monitor import MEXCOrderMonitor
-            config = TRADING_CONFIG['mexc']
-            order_monitor = MEXCOrderMonitor(
-                api_key=config['api_key'],
-                api_secret=config['api_secret']
-            )
-
-    def on_order_update(order):
-        """Callback for order updates via WebSocket."""
-        nonlocal total_filled_qty, current_order1
-
-        # Only process updates for our current order
-        if not current_order1 or str(order.order_id) != str(current_order1.order_id):
-            return
-
-        filled_qty = order.filled_quantity
-
-        # New fill detected
-        if filled_qty > total_filled_qty:
-            new_fill = filled_qty - total_filled_qty
-            is_full = (filled_qty >= order.size)
-            fill_type = "Full fill" if is_full else "Partial fill"
-            print(f"{Fore.GREEN}✓ {fill_type}: {new_fill:.4f} (Total: {filled_qty:.4f}/{order.size})")
-
-            # Place market order on exchange2 for the filled amount
-            print(f"{Fore.YELLOW}Placing MARKET order on {args.exchange2} for {new_fill:.4f}...")
-            order2 = executor2.place_order(
-                symbol=args.symbol,
-                side=side2,
-                size=new_fill,
-                order_type=OrderType.MARKET
-            )
-            print(f"{Fore.GREEN}✓ Market order placed: ID={order2.order_id}")
-
-            total_filled_qty = filled_qty
-
-        # Check if fully filled
-        if order.status == OrderStatus.FILLED:
-            print(f"{Fore.GREEN}✓ All orders filled!")
-            print(f"{Fore.GREEN}✓ Position opened successfully")
-            is_complete.set()
-
-        # Check if cancelled (expected during price updates)
-        elif order.status == OrderStatus.CANCELLED:
-            print(f"{Fore.YELLOW}⚠ Order cancelled (expected for price renewal)")
-
-    def round_price(price: float) -> float:
-        """Round price to exchange precision."""
-        return round(price, price_precision)
-
-    def on_price_update_from_tracker(new_price: float, old_price: Optional[float]):
-        """Callback when price should be updated."""
-        nonlocal current_order1, total_filled_qty
-
-        # Round price to exchange precision
-        new_price = round_price(new_price)
-
-        if old_price is None:
-            # First price - place initial order
-            print(f"{Fore.YELLOW}[1/3] Placing initial LIMIT order on {args.exchange1} @ {new_price:.{price_precision}f}...")
-        else:
-            # Price has moved - renew order
-            print(f"{Fore.YELLOW}Price moved: {old_price:.{price_precision}f} → {new_price:.{price_precision}f} ({((new_price - old_price) / old_price * 100):+.2f}%)")
-
-            # Cancel existing order if it exists
-            if current_order1:
-                try:
-                    print(f"{Fore.YELLOW}Cancelling order {current_order1.order_id}...")
-                    executor1.cancel_order(current_order1.order_id, args.symbol)
-
-                    # Check for partial fills via REST
-                    status = executor1.get_order_status(current_order1.order_id, args.symbol)
-                    if status.filled_quantity > total_filled_qty:
-                        new_fill = status.filled_quantity - total_filled_qty
-                        print(f"{Fore.YELLOW}⚠ Partial fill before cancel: {new_fill:.4f}")
-
-                        # Hedge the partial fill
-                        order2 = executor2.place_order(
-                            symbol=args.symbol,
-                            side=side2,
-                            size=new_fill,
-                            order_type=OrderType.MARKET
-                        )
-                        print(f"{Fore.GREEN}✓ Hedged partial fill: ID={order2.order_id}")
-                        total_filled_qty = status.filled_quantity
-
-                except Exception as e:
-                    print(f"{Fore.RED}Error cancelling order: {e}")
-
-            # Calculate remaining size
-            remaining_size = args.size - total_filled_qty
-            if remaining_size <= 0:
-                print(f"{Fore.GREEN}✓ Position fully filled!")
-                is_complete.set()
-                return
-
-            print(f"{Fore.YELLOW}Placing new LIMIT order @ {new_price:.{price_precision}f} (size: {remaining_size:.4f})...")
-
-        # Place new order
-        try:
-            remaining_size = args.size - total_filled_qty
-            current_order1 = executor1.place_order(
-                symbol=args.symbol,
-                side=side1,
-                size=remaining_size,
-                order_type=OrderType.LIMIT,
-                price=new_price
-            )
-            print(f"{Fore.GREEN}✓ Order placed: ID={current_order1.order_id}")
-        except Exception as e:
-            print(f"{Fore.RED}✗ Error placing order: {e}")
-            is_complete.set()
-
-    # Set up price tracker callback
-    price_tracker.on_price_update = on_price_update_from_tracker
-
-    # Set up order monitor callback if using WebSocket
-    if order_monitor:
-        order_monitor.set_callback(on_order_update)
-
-    def on_orderbook_update(orderbook: OrderbookData):
-        """Callback for orderbook updates from exchange2."""
-        # Convert to PriceUpdate
-        price_update = PriceUpdate(
-            symbol=orderbook.symbol,
-            bid=orderbook.best_bid,
-            ask=orderbook.best_ask,
-            timestamp=orderbook.timestamp
-        )
-
-        # Process through tracker
-        new_target_price = price_tracker.process_price_update(price_update)
-        if new_target_price is not None:
-            # Trigger happens in callback
-            pass
-
-    # Set callback for orderbook updates
-    ws_collector.set_callback(on_orderbook_update)
-
-    try:
-        print(f"{Fore.YELLOW}[2/3] Monitoring {args.exchange2} orderbook...")
-
-        # Start tasks
-        tasks = [
-            asyncio.create_task(ws_collector.connect(args.symbol)),
-        ]
-
-        # Add order monitor if available
-        if order_monitor:
-            tasks.append(asyncio.create_task(order_monitor.connect()))
-            print(f"{Fore.CYAN}Using WebSocket order monitoring for {args.exchange1}")
-        else:
-            # Use REST polling for Hyperliquid
-            async def poll_orders():
-                """Poll order status via REST for exchanges without WebSocket monitoring."""
-                nonlocal total_filled_qty, current_order1
-
-                while not is_complete.is_set():
-                    await asyncio.sleep(args.poll_interval)
-
-                    if current_order1:
-                        try:
-                            status = executor1.get_order_status(current_order1.order_id, args.symbol)
-                            filled_qty = status.filled_quantity
-
-                            # New fill detected
-                            if filled_qty > total_filled_qty:
-                                new_fill = filled_qty - total_filled_qty
-                                is_full = (filled_qty >= status.size)
-                                fill_type = "Full fill" if is_full else "Partial fill"
-                                print(f"{Fore.GREEN}✓ {fill_type}: {new_fill:.4f} (Total: {filled_qty:.4f}/{status.size})")
-
-                                # Place market order on exchange2
-                                print(f"{Fore.YELLOW}Placing MARKET order on {args.exchange2} for {new_fill:.4f}...")
-                                order2 = executor2.place_order(
-                                    symbol=args.symbol,
-                                    side=side2,
-                                    size=new_fill,
-                                    order_type=OrderType.MARKET
-                                )
-                                print(f"{Fore.GREEN}✓ Market order placed: ID={order2.order_id}")
-
-                                total_filled_qty = filled_qty
-
-                            # Check if fully filled
-                            if status.status == OrderStatus.FILLED:
-                                print(f"{Fore.GREEN}✓ All orders filled!")
-                                print(f"{Fore.GREEN}✓ Position opened successfully")
-                                is_complete.set()
-
-                        except Exception as e:
-                            print(f"{Fore.YELLOW}⚠ Error polling order: {e}")
-
-            tasks.append(asyncio.create_task(poll_orders()))
-            print(f"{Fore.CYAN}Using REST polling for {args.exchange1}")
-
-        # Add completion and timeout tasks
-        tasks.append(asyncio.create_task(is_complete.wait()))
-
-        if args.timeout is not None:
-            async def timeout_handler():
-                await asyncio.sleep(args.timeout)
-                print(f"{Fore.RED}✗ Timeout reached ({args.timeout}s)")
-                is_complete.set()
-            tasks.append(asyncio.create_task(timeout_handler()))
-
-        # Wait for completion
-        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-
-        # Cancel pending tasks
-        for task in pending:
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                pass
-
-        # Print final stats
-        print()
-        print(f"{Fore.CYAN}Trading Statistics:")
-        stats = price_tracker.get_stats()
-        print(f"  Total filled: {total_filled_qty:.4f}/{args.size}")
-        print(f"  Price updates: {stats['price_updates_count']}")
-        print(f"  Orders renewed: {stats['orders_renewed_count']}")
-        if stats['last_order_price']:
-            print(f"  Final order price: {stats['last_order_price']:.{price_precision}f}")
-
-    except (KeyboardInterrupt, asyncio.CancelledError):
-        print(f"\n{Fore.YELLOW}⚠ Interrupted by user")
-        if current_order1:
-            handle_interruption(executor1, current_order1.order_id, args.symbol, args.exchange1)
-        raise
-
-    except Exception as e:
-        print(f"{Fore.RED}✗ Error: {str(e)}")
-        if current_order1:
-            print(f"{Fore.CYAN}Order ID {current_order1.order_id} may still be active on {args.exchange1}")
-        sys.exit(1)
-
-    finally:
-        # Cleanup
-        await ws_collector.disconnect()
-        if order_monitor:
-            await order_monitor.disconnect()
-
-
-
 def open_position(args):
-    """Dispatcher: choose dynamic, WebSocket, or polling mode based on configuration"""
-
-    # Check if dynamic mode is enabled
-    if hasattr(args, 'dynamic_mode') and args.dynamic_mode:
-        try:
-            asyncio.run(open_position_dynamic(args))
-        except (KeyboardInterrupt, asyncio.CancelledError):
-            sys.exit(1)
-        return
-
-    # Original logic for non-dynamic mode
+    """Dispatcher: choose WebSocket or polling based on exchange"""
     exchange1 = args.exchange1.lower()
 
     # Use WebSocket for Aster and MEXC
@@ -846,13 +476,9 @@ def main():
     open_parser.add_argument('--side2', required=True, help='Side for exchange2 (long/short)')
     open_parser.add_argument('--symbol', required=True, help='Trading symbol (normalized, e.g., BTC)')
     open_parser.add_argument('--size', type=float, required=True, help='Order size in symbol units (e.g., 1.5 BTC)')
-    open_parser.add_argument('--price', type=float, help='Limit price for exchange1 (ignored in dynamic mode)')
+    open_parser.add_argument('--price', type=float, help='Limit price for exchange1')
     open_parser.add_argument('--poll-interval', type=float, default=2.0, help='Poll interval in seconds (default: 2)')
     open_parser.add_argument('--timeout', type=int, default=None, help='Timeout in seconds (default: None - no timeout)')
-    # Dynamic pricing mode
-    open_parser.add_argument('--dynamic-mode', action='store_true', help='Enable dynamic pricing based on exchange2')
-    open_parser.add_argument('--price-offset-pct', type=float, default=0.0, help='Price offset percentage from exchange2 reference price (e.g., 0.5 for +0.5%%, -0.5 for -0.5%%)')
-    open_parser.add_argument('--price-tolerance-pct', type=float, default=0.3, help='Price variation threshold to renew order, as percentage (e.g., 0.3 for 0.3%%, 0.002 for 0.002%%). Default: 0.3%%')
 
     # Close command
     close_parser = subparsers.add_parser('close', help='Close position')
@@ -862,13 +488,9 @@ def main():
     close_parser.add_argument('--side2', required=True, help='Side for exchange2 (close_long/close_short)')
     close_parser.add_argument('--symbol', required=True, help='Trading symbol (normalized, e.g., BTC)')
     close_parser.add_argument('--size', type=float, required=True, help='Order size in symbol units (e.g., 1.5 BTC)')
-    close_parser.add_argument('--price', type=float, help='Limit price for exchange1 (ignored in dynamic mode)')
+    close_parser.add_argument('--price', type=float, help='Limit price for exchange1')
     close_parser.add_argument('--poll-interval', type=float, default=2.0, help='Poll interval in seconds (default: 2)')
     close_parser.add_argument('--timeout', type=int, default=None, help='Timeout in seconds (default: None - no timeout)')
-    # Dynamic pricing mode
-    close_parser.add_argument('--dynamic-mode', action='store_true', help='Enable dynamic pricing based on exchange2')
-    close_parser.add_argument('--price-offset-pct', type=float, default=0.0, help='Price offset percentage from exchange2 reference price (e.g., 0.5 for +0.5%%, -0.5 for -0.5%%)')
-    close_parser.add_argument('--price-tolerance-pct', type=float, default=0.3, help='Price variation threshold to renew order, as percentage (e.g., 0.3 for 0.3%%, 0.002 for 0.002%%). Default: 0.3%%')
 
     # Cancel command
     cancel_parser = subparsers.add_parser('cancel', help='Cancel order')

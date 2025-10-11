@@ -210,3 +210,16 @@ class MEXCOrderMonitor:
                 self._heartbeat_task.cancel()
             if self.ws:
                 await self.ws.close()
+
+    async def disconnect(self):
+        """Disconnect from WebSocket and cleanup resources"""
+        if self._heartbeat_task:
+            self._heartbeat_task.cancel()
+            try:
+                await self._heartbeat_task
+            except asyncio.CancelledError:
+                pass
+
+        if self.ws:
+            await self.ws.close()
+            self.ws = None

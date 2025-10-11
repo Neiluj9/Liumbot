@@ -122,7 +122,7 @@ TRADING_CONFIG = {
         # Get cookie key from browser after logging into MEXC Futures
         # This is the authorization key used for signing requests
         # Find it in browser dev tools: Network tab -> any futures API request -> Request Headers -> Authorization
-        "cookie_key": "WEB75e76c307937b536bbd96b67ddde36b38d190308a3bd82b8ea8ff982c89b8c35",
+        "cookie_key": "WEB38b8a77191735ca83c5e5cfc8377f05af536640e9a7306558cdaa399c598f2e8",
 
         # Optional: API credentials for WebSocket order monitoring
         # Get these from MEXC website > Account > API Management

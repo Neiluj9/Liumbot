@@ -24,8 +24,11 @@ python scripts/spread_monitor.py --symbol BTC --exchange-a hyperliquid --exchang
 # Generate spread charts
 python scripts/spread_plotter.py
 
-# Execute trades (manual mode)
+# Execute trades (manual mode with fixed price)
 python scripts/trade_cli.py open --exchange1 hyperliquid --side1 long --exchange2 mexc --side2 short --symbol BTC --size 100 --price 50000
+
+# Execute trades (dynamic pricing mode - tracks exchange2 orderbook)
+python scripts/trade_cli.py open --exchange1 hyperliquid --side1 short --exchange2 mexc --side2 long --symbol BTC --size 0.1 --dynamic-mode --price-offset-pct -0.5 --price-tolerance-pct 0.3
 
 # Close trades
 python scripts/trade_cli.py close --exchange1 hyperliquid --exchange2 mexc --symbol BTC
@@ -75,7 +78,8 @@ liumbot2/
 │   ├── aster_order_monitor_example.py
 │   └── test_aster_websocket_orders.py
 ├── utils/                     # Shared utilities
-│   └── time_utils.py          # Time/date utilities
+│   ├── time_utils.py          # Time/date utilities
+│   └── price_tracker.py       # Dynamic price tracking for synchronized trading
 ├── exports/                   # Analysis outputs
 │   ├── funding_rates/         # Historical funding rates JSON
 │   ├── arbitrage_opportunities/ # Detected opportunities JSON
@@ -84,7 +88,8 @@ liumbot2/
 │       └── png/               # Chart visualizations
 └── docs/                      # Documentation
     ├── api-reference.md
-    └── order-monitoring.md
+    ├── order-monitoring.md
+    └── dynamic-pricing.md
 ```
 
 ### Core Components
@@ -206,6 +211,7 @@ All exchanges use different symbol formats (e.g., "BTC-PERP", "BTCUSDT", "BTC").
 ### Trading Execution
 - Synchronized order placement across exchanges
 - Support for opening and closing positions
+- **Dynamic pricing mode**: Automatically adjusts limit prices based on real-time orderbook from exchange 2
 - Real-time order status monitoring via WebSocket
 - Multiple authentication methods (EIP-712, API keys, cookies)
 
@@ -235,6 +241,7 @@ All exchanges use different symbol formats (e.g., "BTC-PERP", "BTCUSDT", "BTC").
 For detailed information, see:
 - **[API Reference](docs/api-reference.md)** - Complete API documentation
 - **[Order Monitoring](docs/order-monitoring.md)** - WebSocket order tracking guide
+- **[Dynamic Pricing](docs/dynamic-pricing.md)** - Automatic price adjustment based on exchange 2 orderbook
 - **[Main README](README.md)** - Project overview and quick start
 
 ## Important Notes
